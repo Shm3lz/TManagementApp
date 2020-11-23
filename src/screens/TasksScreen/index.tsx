@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Title } from 'react-native-paper';
+import { Title, useTheme } from 'react-native-paper';
 import { View } from 'react-native';
 
 import Routes from '../../routes';
@@ -12,7 +12,7 @@ interface TasksScreen {
 const TasksScreen: React.FC = () => {
 	return (
 		<View>
-			<Title>view</Title>
+			<Title>3123123</Title>
 		</View>
 	);
 };

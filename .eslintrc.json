@@ -19,6 +19,7 @@
     },
     "plugins": [
         "react",
+        "react-hooks",
         "@typescript-eslint"
     ],
     "rules": {
@@ -38,12 +39,15 @@
             "error",
             "always"
         ],
+        "react/display-name": "off",
         "comma-dangle": ["error", "always-multiline"],
         "no-trailing-spaces": "error",
         "no-console": "error",
         "no-invalid-regexp": "error",
         "no-eval": "error",
         "camelcase": "warn",
-        "react/prop-types": 0
+        "react/prop-types": 0,
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "warn"
     }
 }
