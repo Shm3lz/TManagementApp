@@ -9,14 +9,17 @@ import { Provider as StoreProvider } from 'react-redux';
 import merge from 'deepmerge';
 
 import Navigator from '../Navigator';
+import { store } from '../../store';
 
 const theme = merge(NavigationDefaultTheme, PaperDefaultTheme);
 
 const App: React.FC = () => {
 	return (
-		<PaperProvider theme={theme}>
-			<Navigator theme={theme} />
-		</PaperProvider>
+		<StoreProvider store={store}>
+			<PaperProvider theme={theme}>
+				<Navigator theme={theme} />
+			</PaperProvider>
+		</StoreProvider>
 	);
 };
 

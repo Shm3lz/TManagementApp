@@ -1,9 +1,10 @@
 import React from 'react';
-import { Button } from 'react-native-paper';
+import { Button, withTheme } from 'react-native-paper';
 import { StyleSheet } from 'react-native';
 
 interface TodayButtonProps {
 	onPress?: () => void;
+	theme: ReactNativePaper.Theme;
 }
 
 const style = StyleSheet.create({
@@ -12,13 +13,25 @@ const style = StyleSheet.create({
 	},
 });
 
-const TodayButton: React.FC<TodayButtonProps> = ({ onPress }) => {
+const TodayButton: React.FC<TodayButtonProps> = ({ onPress, theme }) => {
+	const todayButtonTheme = {
+		colors: {
+			primary: theme.colors.surface,
+		},
+	};
+
 	return (
-		<Button mode="contained" style={style.btn} uppercase={false} onPress={onPress}>
+		<Button
+			style={style.btn}
+			mode="contained"
+			uppercase={false}
+			onPress={onPress}
+			theme={todayButtonTheme}
+		>
 			Today
 		</Button>
 	);
 };
 
 
-export default React.memo(TodayButton);
+export default React.memo(withTheme(TodayButton));

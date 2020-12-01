@@ -1,18 +1,19 @@
 import * as React from 'react';
-import { Title, useTheme } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 import { View } from 'react-native';
 
 import Routes from '../../routes';
 import { ScreenNavigationProp } from '../../containers/Navigator';
+import TodayButton from '../../components/TodayButton';
 
 interface TasksScreen {
 	navigation: ScreenNavigationProp<Routes.Main>
 }
 
 const TasksScreen: React.FC = () => {
+	const theme = useTheme();
 	return (
 		<View>
-			<Title>3123123</Title>
 		</View>
 	);
 };
