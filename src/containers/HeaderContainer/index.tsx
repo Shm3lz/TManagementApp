@@ -4,8 +4,6 @@ import { Appbar, useTheme } from 'react-native-paper';
 import { View, StyleSheet } from 'react-native';
 import { DrawerActions } from '@react-navigation/native';
 
-import { DeepPartial } from '../../util/types';
-
 interface HeaderContainerProps extends DrawerHeaderProps{
 	footerWidget?: React.ComponentType<{ theme: ReactNativePaper.Theme }>;
 }

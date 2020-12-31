@@ -52,8 +52,12 @@ const TasksHeader: React.FC<TasksHeader> = ({
 				<TouchableRipple onPress={onLeftPress}>
 					<AntDesign name="left" size={12} color={theme?.colors?.text} />
 				</TouchableRipple>
-				<Title onPress={onDatePress} style={titleStyle}>{dateText}</Title>
-				<AntDesign onPress={onRightPress} name="right" size={12} color={theme?.colors?.text} />
+				<TouchableRipple onPress={onDatePress}>
+					<Title style={titleStyle}>{dateText}</Title>
+				</TouchableRipple>
+				<TouchableRipple onPress={onRightPress}>
+					<AntDesign onPress={onRightPress} name="right" size={12} color={theme?.colors?.text} />
+				</TouchableRipple>
 			</View>
 			<View style={style.tasksInfo}>
 				<Subheading style={typographyStyle}>{tasksDoneNumber}/{tasksNumber} tasks done</Subheading>
