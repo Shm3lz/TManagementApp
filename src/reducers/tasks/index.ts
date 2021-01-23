@@ -1,5 +1,5 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
-import { ById, WeekDay } from '../util/types';
+import { ById, WeekDay } from '../../util/types';
 
 interface SimpleGoal {
 	progress: number; // seconds
@@ -24,8 +24,8 @@ interface SubtaskGoal {
 
 type Goal = SimpleGoal | NumberGoal | TimeGoal | SubtaskGoal;
 
-interface Task {
-	id: string;
+export interface Task {
+	id: string; // is a timestamp actually
 	date: Date;
 	name: string;
 	description: string;
@@ -34,14 +34,13 @@ interface Task {
 	done: boolean;
 }
 
-type SingleTask = Task;
+export type SingleTask = Task;
 
-interface RegularTaskInstance extends Task {
+export interface RegularTaskInstance extends Task {
 	templateId: string;
 }
 
-interface RegularTaskTemplate extends Task {
-	templateId: string;
+export interface RegularTaskTemplate extends Task {
 	repeat: WeekDay[];
 }
 
@@ -64,15 +63,15 @@ interface TasksState {
 	templates: ById<RegularTaskTemplate>
 }
 
-const addRegularTask = createAction<RegularTaskTemplate>('tasks/addRegularTask');
+export const addRegularTask = createAction<RegularTaskTemplate>('tasks/addRegularTask');
 
-const addSingleTask = createAction<SingleTask>('tasks/addSingleTask');
+export const addSingleTask = createAction<SingleTask>('tasks/addSingleTask');
 
-const deleteSingleTask = createAction<string>('tasks/deleteSingleTask');
+export const deleteSingleTask = createAction<string>('tasks/deleteSingleTask');
 
-const deleteRegularTask = createAction<string>('tasks/deleteRegularTask');
+export const deleteRegularTask = createAction<string>('tasks/deleteRegularTask');
 
-const instantiateTemplate = createAction<{ id: string, date: Date}>('tasks/instantiateTemplate');
+export const instantiateTemplate = createAction<{ id: string, date: Date }>('tasks/instantiateTemplate');
 
 const initialState = {
 	templates: {},
@@ -80,9 +79,9 @@ const initialState = {
 	regular: {},
 };
 
-const tasksReducer = createReducer<TasksState>(initialState, builder => {
+export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 	builder.addCase(addRegularTask, (state, action) => {
-		state.templates[action.payload.templateId] = action.payload;
+		state.templates[action.payload.id] = action.payload;
 	});
 
 	builder.addCase(addSingleTask, (state, action) => {
@@ -108,15 +107,14 @@ const tasksReducer = createReducer<TasksState>(initialState, builder => {
 	});
 
 	builder.addCase(instantiateTemplate, (state, action) => {
-
-		// generate unique id here
-		const instanceId = `TEST_ID_${action.payload.id}`;
+		const instanceId = Date.now().toString();
+		const template = state.templates[action.payload.id];
 		state.regular[instanceId] = {
-			...state.templates[action.payload.id],
+			...template,
 			id: instanceId,
 			date: action.payload.date,
+			templateId: template.id,
 		};
 	});
 });
 
-export { tasksReducer, addSingleTask, addRegularTask, instantiateTemplate };
