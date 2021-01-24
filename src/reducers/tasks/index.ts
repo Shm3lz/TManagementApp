@@ -73,6 +73,10 @@ export const deleteRegularTask = createAction<string>('tasks/deleteRegularTask')
 
 export const instantiateTemplate = createAction<{ id: string, date: Date }>('tasks/instantiateTemplate');
 
+export const editSingleTask = createAction<{ id: string, data: Partial<SingleTask> }>('tasks/editSingleTask');
+
+export const setTaskDone = createAction<{ id: string, done?: boolean }>('tasks/setTaskDone');
+
 const initialState = {
 	templates: {},
 	single: {},
@@ -90,6 +94,15 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 
 	builder.addCase(deleteSingleTask, (state, { payload: id }) => {
 		delete state.single[id];
+	});
+
+	builder.addCase(editSingleTask, (state, action) => {
+		const task = state.single[action.payload.id];
+
+		state.single[action.payload.id] = {
+			...task,
+			...action.payload.data,
+		};
 	});
 
 	builder.addCase(deleteRegularTask, (state, { payload: id }) => {
@@ -115,6 +128,13 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 			date: action.payload.date,
 			templateId: template.id,
 		};
+	});
+
+	builder.addCase(setTaskDone, (state, action) => {
+		const { id, done = true } = action.payload;
+
+		if (id in state.single) state.single[id].done = done;
+		if (id in state.regular) state.regular[id].done = done;
 	});
 });
 

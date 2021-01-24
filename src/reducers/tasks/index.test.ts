@@ -3,10 +3,13 @@ import {
 	tasksReducer,
 	addSingleTask,
 	deleteSingleTask,
+	editSingleTask,
 	addRegularTask,
 	deleteRegularTask,
 	instantiateTemplate,
+	setTaskDone,
 	Task,
+	SingleTask,
 	RegularTaskTemplate,
 } from './index';
 
@@ -35,7 +38,6 @@ describe('Tasks redux state', () => {
 		done: false,
 	};
 
-	const templateId = 'template';
 	const regularTask: RegularTaskTemplate = {
 		id: taskId,
 		date: new Date(),
@@ -55,6 +57,30 @@ describe('Tasks redux state', () => {
 			const store = createEmptyStore();
 			store.dispatch(addSingleTask(singleTask));
 			expect(store.getState().single[taskId]).toBe(singleTask);
+		});
+	});
+
+	describe('#editSingleTask', () => {
+		it('Edits single task by id', () => {
+			const store = configureStore({
+				reducer: tasksReducer,
+				preloadedState: {
+					single: {
+						[taskId]: singleTask,
+					},
+				},
+				middleware: getDefaultMiddleware({ serializableCheck: false }),
+			});
+
+			const newTaskData: Partial<SingleTask> = {
+				description: 'New test description',
+				color: '#000000',
+			};
+
+			store.dispatch(editSingleTask({ id: taskId, data: newTaskData }));
+			const edited = store.getState().single[taskId];
+			expect(edited.description).toBe('New test description');
+			expect(edited.color).toBe('#000000');
 		});
 	});
 
@@ -130,4 +156,56 @@ describe('Tasks redux state', () => {
 		});
 	});
 
+	describe('#setTaskDone', () => {
+		it('Sets task\'s done value to true by default', () => {
+			const store = configureStore({
+				reducer: tasksReducer,
+				preloadedState: {
+					single: {
+						[taskId]: singleTask,
+					},
+					regular: {},
+				},
+				middleware: getDefaultMiddleware({ serializableCheck: false }),
+			});
+
+			store.dispatch(setTaskDone({ id: taskId }));
+			expect(store.getState().single[taskId].done).toBeTruthy();
+		});
+
+		it('Changes single task\'s value', () => {
+			const store = configureStore({
+				reducer: tasksReducer,
+				preloadedState: {
+					single: {
+						[taskId]: {
+							...singleTask,
+							done: true,
+						},
+					},
+					regular: {},
+				},
+				middleware: getDefaultMiddleware({ serializableCheck: false }),
+			});
+
+			store.dispatch(setTaskDone({ id: taskId, done: false }));
+			expect(store.getState().single[taskId].done).toBeFalsy();
+		});
+
+		it('Changes regular task\'s value', () => {
+			const store = configureStore({
+				reducer: tasksReducer,
+				preloadedState: {
+					regular: {
+						[taskId]: singleTask,
+					},
+					single: {},
+				},
+				middleware: getDefaultMiddleware({ serializableCheck: false }),
+			});
+
+			store.dispatch(setTaskDone({ id: taskId, done: true }));
+			expect(store.getState().regular[taskId].done).toBeTruthy();
+		});
+	});
 });
