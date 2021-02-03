@@ -4,4 +4,13 @@ export type DeepPartial<T> = {
 
 export type ById<T> = { [id: string]: T };
 
-export type WeekDay = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export enum WeekDay {
+	Monday,
+	Tuesday,
+	Wednsday,
+	Thursday,
+	Friday,
+	Saturday,
+	Sunday,
+}
+
