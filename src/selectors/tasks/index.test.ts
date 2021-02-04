@@ -11,8 +11,8 @@ function generateTask(id: string, date: Date = new Date()): SingleTask {
 	return {
 		id,
 		date,
-		name: Math.random().toString(36).substring(10),
-		description: Math.random().toString(36).substring(20),
+		name: Math.random().toString(36).substring(5),
+		description: Math.random().toString(36).substring(2),
 		color: '#ffffff',
 		goal: {
 			progress: 0,

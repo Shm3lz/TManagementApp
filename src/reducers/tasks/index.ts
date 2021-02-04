@@ -1,38 +1,26 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 import { ById, WeekDay } from '../../util/types';
 
-interface SimpleGoal {
-	progress: number; // seconds
-	goal: number; // seconds
-}
-
-interface NumberGoal extends SimpleGoal {
+interface Goal<U, T> {
+	progress: U;
+	objective: T;
 	unitName: string;
 }
 
-type TimeGoal = SimpleGoal;
+type SimpleGoal = Goal<number, number>;
+type ComplexGoal = Goal<number, Array<GenericTask<SimpleGoal>>>;
 
-interface Subtask extends Task {
-	id: string;
-}
-
-interface SubtaskGoal {
-	tasks: {
-		[id: string]: Subtask
-	}
-}
-
-type Goal = SimpleGoal | NumberGoal | TimeGoal | SubtaskGoal;
-
-export interface Task {
+export interface GenericTask<G> {
 	id: string; // is a timestamp actually
 	date: Date;
 	name: string;
 	description: string;
 	color: string; // replace with color type
-	goal: Goal;
+	goal?: G;
 	done: boolean;
 }
+
+export type Task = GenericTask<SimpleGoal | ComplexGoal>;
 
 export type SingleTask = Task;
 
@@ -79,7 +67,48 @@ export const setTaskDone = createAction<{ id: string, done?: boolean }>('tasks/s
 
 const initialState = {
 	templates: {},
-	single: {},
+	single: {
+		'1': {
+			id: '1',
+			date: new Date(),
+			name: 'Отжимания до обеда',
+			description: 'Test description',
+			color: '#000000',
+			goal: {
+				progress: 0,
+				objective: 20,
+				unitName: 'times',
+			},
+			done: false,
+		},
+		'2': {
+			id: '2',
+			date: new Date(),
+			name: 'Отжимания после обеда',
+			description: 'Test description',
+			color: '#000000',
+			goal: {
+				progress: 11,
+				objective: 20,
+				unitName: 'times',
+			},
+			done: false,
+		},
+		'3': {
+			id: '3',
+			date: new Date(),
+			name: 'Test task 3',
+			description: 'Test description',
+			color: '#eb4034',
+			goal: {
+				progress: 3,
+				objective: 10,
+				unitName: 'times',
+			},
+			done: false,
+		},
+	},
+
 	regular: {},
 };
 

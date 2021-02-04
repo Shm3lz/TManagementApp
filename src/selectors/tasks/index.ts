@@ -1,3 +1,4 @@
+import { isSameDay } from 'date-fns';
 import { createSelector } from 'reselect';
 import { RegularTaskInstance, RegularTaskTemplate, SingleTask } from '../../reducers/tasks';
 import { State } from '../../store';
@@ -6,7 +7,7 @@ import { WeekDay } from '../../util/types';
 export const getSingleTasksByDate = createSelector<State, Date, SingleTask[], SingleTask[]>(
 	(state, date) => Object
 		.values(state.tasks.single)
-		.filter(item => item.date === date),
+		.filter(item => isSameDay(item.date, date)),
 	items => items,
 );
 
@@ -18,7 +19,7 @@ export const getRegularTasksByDate = createSelector<
 >(
 	(state, date) => Object
 		.values(state.tasks.regular)
-		.filter(item => item.date === date),
+		.filter(item => isSameDay(item.date, date)),
 	items => items,
 );
 
