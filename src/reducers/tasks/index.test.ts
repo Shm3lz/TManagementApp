@@ -31,10 +31,6 @@ describe('Tasks redux state', () => {
 		name: 'Test task',
 		description: 'Test description',
 		color: '#ffffff',
-		goal: {
-			progress: 0,
-			goal: 10,
-		},
 		done: false,
 	};
 
@@ -44,10 +40,6 @@ describe('Tasks redux state', () => {
 		name: 'Test task',
 		description: 'Test description',
 		color: '#ffffff',
-		goal: {
-			progress: 0,
-			goal: 10,
-		},
 		done: false,
 		repeat: [1, 2, 3],
 	};

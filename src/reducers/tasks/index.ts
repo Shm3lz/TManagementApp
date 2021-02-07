@@ -1,14 +1,14 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 import { ById, WeekDay } from '../../util/types';
 
-interface Goal<U, T> {
+export interface Goal<U, T> {
 	progress: U;
 	objective: T;
 	unitName: string;
 }
 
-type SimpleGoal = Goal<number, number>;
-type ComplexGoal = Goal<number, Array<GenericTask<SimpleGoal>>>;
+export type SimpleGoal = Goal<number, number>;
+export type ComplexGoal = Goal<number, Array<GenericTask<SimpleGoal>>>;
 
 export interface GenericTask<G> {
 	id: string; // is a timestamp actually
@@ -71,7 +71,7 @@ const initialState = {
 		'1': {
 			id: '1',
 			date: new Date(),
-			name: 'Отжимания до обеда',
+			name: 'tst1',
 			description: 'Test description',
 			color: '#000000',
 			goal: {
@@ -84,7 +84,7 @@ const initialState = {
 		'2': {
 			id: '2',
 			date: new Date(),
-			name: 'Отжимания после обеда',
+			name: 'tst 2',
 			description: 'Test description',
 			color: '#000000',
 			goal: {
@@ -92,7 +92,7 @@ const initialState = {
 				objective: 20,
 				unitName: 'times',
 			},
-			done: false,
+			done: true,
 		},
 		'3': {
 			id: '3',
