@@ -1,32 +1,54 @@
 import * as React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import { createStackNavigator } from '@react-navigation/stack';
 
-import TasksListContainer from '../../containers/TasksListContainer';
+import StackHeaderContainer from '../../containers/StackHeaderContainer';
 import Routes from '../../routes';
-import { ScreenNavigationProp } from '../../containers/Navigator';
+import { DrawerScreenHeader, ScreenNavigationProp } from '../../containers/Navigator';
+import TaskInfoScreen from '../TaskInfoScreen';
+import { getFocusedRouteNameFromRoute, Route } from '@react-navigation/native';
+import TasksListScreen from '../TasksListScreen';
+import DrawerHeaderContainer from '../../containers/DrawerHeaderContainer';
+import TasksHeaderWidgetContainer from '../../containers/TasksHeaderWidgetContainer';
+import TodayButtonContainer from '../../containers/TodayButtonContainer';
 
-interface TasksScreen {
+const Stack = createStackNavigator();
+
+interface TasksScreenProps {
 	navigation: ScreenNavigationProp<Routes.Main>
+	route: Route<Routes.Main>
 }
 
-const styles = StyleSheet.create({
-	addBtn: {
-		position: 'absolute',
-		bottom: '5%',
-		right: '5%',
-	},
-	wrapper: {
-		flex: 1,
-	},
-});
+const stackOptions = { headerShown: false };
 
-const TasksScreen: React.FC = () => {
+const TasksScreen: React.FC<TasksScreenProps> = ({ navigation, route }) => {
+	const mainScreenHeader: DrawerScreenHeader = props =>
+		<DrawerHeaderContainer
+			footerWidget={<TasksHeaderWidgetContainer />}
+			{...props}
+		/>;
+
+	React.useLayoutEffect(() => {
+		const focusedRoute = getFocusedRouteNameFromRoute(route);
+
+		if (focusedRoute === Routes.TaskInfo) {
+			navigation.setOptions({
+				header: props => <StackHeaderContainer {...props} />,
+			});
+
+			return;
+		}
+
+		navigation.setOptions({
+			header: mainScreenHeader,
+			headerRight: () => <TodayButtonContainer />,
+		});
+	}, [navigation, route]);
+
 	return (
-		<View style={styles.wrapper}>
-			<TasksListContainer />
-			<AntDesign name="pluscircle" size={48} style={styles.addBtn} color="green" />
-		</View>
+		<Stack.Navigator screenOptions={stackOptions} initialRouteName={Routes.TasksList}>
+			<Stack.Screen name={Routes.TaskInfo} component={TaskInfoScreen} />
+			<Stack.Screen name={Routes.TasksList} component={TasksListScreen} />
+		</Stack.Navigator>
 	);
 };
 

@@ -2,12 +2,12 @@ import * as React from 'react';
 import { Title } from 'react-native-paper';
 import { View } from 'react-native';
 
-const SettingsScreen: React.FC = () => {
+const TaskInfoScreen: React.FC = () => {
 	return (
 		<View>
-			<Title>Settings</Title>
+			<Title>Task info...</Title>
 		</View>
 	);
 };
 
-export default SettingsScreen;
+export default TaskInfoScreen;
