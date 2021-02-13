@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import Header from '../../components/Header';
-import { DrawerHeaderProps } from '@react-navigation/drawer/lib/typescript/src/types';
 import { StackActions } from '@react-navigation/native';
+import { StackHeaderProps } from '@react-navigation/stack';
 
-interface HeaderContainerProps extends DrawerHeaderProps {
+interface HeaderContainerProps extends StackHeaderProps {
 	footerWidget?: React.ReactNode;
 }
 

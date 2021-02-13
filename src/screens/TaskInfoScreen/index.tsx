@@ -1,13 +1,50 @@
 import * as React from 'react';
 import { Title } from 'react-native-paper';
 import { View } from 'react-native';
+import { Route } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-const TaskInfoScreen: React.FC = () => {
+import TaskInfo from '../../components/TaskInfo';
+import Routes from '../../routes';
+import StackHeaderContainer from '../../containers/StackHeaderContainer';
+import { Task } from '../../reducers/tasks';
+import { connect, MapStateToProps } from 'react-redux';
+import { State } from '../../store';
+import { MaterialIcons } from '@expo/vector-icons';
+
+interface TaskInfoScreenProps {
+	navigation: StackNavigationProp<{ [Routes.TaskInfo]: { id: string }}>;
+	route: Route<Routes.TaskInfo>;
+}
+
+interface StateProps {
+	selectedTask: Task;
+}
+
+const mapStateToProps: MapStateToProps<StateProps, TaskInfoScreenProps, State> = (state, props) => {
+	const { id } = props.route.params;
+
+	return {
+		selectedTask: state.tasks.regular[id] || state.tasks.single[id],
+	};
+};
+
+const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps> = ({ navigation, selectedTask }) => {
+	React.useLayoutEffect(() => {
+		navigation
+			.dangerouslyGetParent()
+			?.setOptions({
+				header: props => <StackHeaderContainer footerWidget={<Title style={{ textAlign: 'center'}}>{selectedTask.name}</Title>} {...props} />,
+				headerTitle: '',
+				headerRight: () => <><MaterialIcons name="edit" size={24} color="white" /><MaterialIcons name="delete" size={24} color="white" /></>,
+			});
+	}, [navigation]);
+
 	return (
 		<View>
-			<Title>Task info...</Title>
+			<TaskInfo data={selectedTask} />
 		</View>
 	);
 };
 
-export default TaskInfoScreen;
+export default connect(mapStateToProps)(TaskInfoScreen);

@@ -10,17 +10,23 @@ export function hasComplexGoal(task: Task): boolean {
 
 export function getObjective(goal: SimpleGoal | ComplexGoal): number {
 	const { objective } = goal;
-	return Array.isArray(objective) ? countTasksDone(objective) : objective;
+	return Array.isArray(objective) ? objective.length : objective;
 }
 
 export function getTaskProgressString({ goal, done }: Task): string {
 	if (!goal) return '';
 
-	return done ? '' : `${goal.progress} of ${getObjective(goal)} ${goal.unitName}`;
+	return done ? '' : `${getGoalProgress(goal)} of ${getObjective(goal)} ${goal.unitName}`;
 }
 
-export function getTaskProgress(goal: ComplexGoal | SimpleGoal): number {
-	const objective = getObjective(goal);
+export function getGoalProgress(goal: ComplexGoal | SimpleGoal): number {
+	if (Array.isArray(goal.objective)) {
+		return countTasksDone(goal.objective);
+	}
 
-	return goal.progress / objective;
+	return (goal as SimpleGoal).progress;
+}
+
+export function getGoalPercantage(goal: ComplexGoal | SimpleGoal): number {
+	return getGoalProgress(goal) / getObjective(goal);
 }

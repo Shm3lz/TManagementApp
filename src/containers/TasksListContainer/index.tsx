@@ -4,8 +4,6 @@ import { State } from '../../store';
 import { setTaskDone, Task } from '../../reducers/tasks';
 import { getRegularTasksByDate, getSingleTasksByDate } from '../../selectors/tasks';
 import TasksList from '../../components/TasksList';
-import { NavigationProp } from '@react-navigation/native';
-import Routes from '../../routes';
 
 interface StateProps {
 	tasks: Task[];
@@ -14,11 +12,11 @@ interface StateProps {
 interface DispatchProps {
 	onTaskDone: (id: string) => void;
 	onTaskUndone: (id: string) => void;
-	onCardPress: () => void;
+	onCardPress: (id: string) => void;
 }
 
 interface OwnProps {
-	navigation: NavigationProp<any>;
+	openTaskInfo: (id: string) => void;
 }
 
 const mapStateToProps: MapStateToProps<StateProps, OwnProps, State> = state => {
@@ -33,7 +31,7 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, State> = state => {
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (dispatch, props) => ({
 	onTaskDone: id => dispatch(setTaskDone({ id })),
 	onTaskUndone: id => dispatch(setTaskDone({ id, done: false })),
-	onCardPress: () => props.navigation.navigate(Routes.TaskInfo),
+	onCardPress: id => props.openTaskInfo(id),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(TasksList);

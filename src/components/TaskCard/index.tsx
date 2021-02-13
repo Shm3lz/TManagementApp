@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, ProgressBar } from 'react-native-paper';
 import { Task } from '../../reducers/tasks';
 import { StyleProp, StyleSheet, ViewStyle } from 'react-native';
-import { getTaskProgress, getTaskProgressString } from '../../helpers/tasks';
+import { getGoalPercantage, getTaskProgressString } from '../../helpers/tasks';
 
 interface TaskCardProps {
 	data: Task;
@@ -30,7 +30,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ data, style: wrapperStyle, onPress 
 	const subtitle = getTaskProgressString(data);
 	const progressBar = React.useMemo(() => <ProgressBar
 		style={style.progressBar}
-		progress={Number(data.done) || data.goal && getTaskProgress(data.goal)}
+		progress={Number(data.done) || data.goal && getGoalPercantage(data.goal)}
 		color={data.color}
 	/>, [data.done, data.color, data.goal]);
 

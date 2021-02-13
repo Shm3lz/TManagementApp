@@ -24,4 +24,4 @@ const App: React.FC = () => {
 };
 
 registerRootComponent(App);
-export default App;
+// export default App;

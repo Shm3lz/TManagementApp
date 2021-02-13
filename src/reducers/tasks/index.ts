@@ -1,20 +1,22 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 import { ById, WeekDay } from '../../util/types';
 
-export interface Goal<U, T> {
-	progress: U;
-	objective: T;
+export interface SimpleGoal {
+	progress: number;
+	objective: number;
 	unitName: string;
 }
 
-export type SimpleGoal = Goal<number, number>;
-export type ComplexGoal = Goal<number, Array<GenericTask<SimpleGoal>>>;
+export interface ComplexGoal {
+	objective: Array<GenericTask<SimpleGoal>>,
+	unitName: 'subtasks';
+}
 
 export interface GenericTask<G> {
 	id: string; // is a timestamp actually
 	date: Date;
 	name: string;
-	description: string;
+	description?: string;
 	color: string; // replace with color type
 	goal?: G;
 	done: boolean;
@@ -65,17 +67,17 @@ export const editSingleTask = createAction<{ id: string, data: Partial<SingleTas
 
 export const setTaskDone = createAction<{ id: string, done?: boolean }>('tasks/setTaskDone');
 
-const initialState = {
+const initialState: TasksState = {
 	templates: {},
 	single: {
 		'1': {
 			id: '1',
 			date: new Date(),
-			name: 'tst1',
+			name: 'tst111111111111111111111111111111111111111111111111111111111111',
 			description: 'Test description',
 			color: '#000000',
 			goal: {
-				progress: 0,
+				progress: 11,
 				objective: 20,
 				unitName: 'times',
 			},
@@ -88,7 +90,7 @@ const initialState = {
 			description: 'Test description',
 			color: '#000000',
 			goal: {
-				progress: 11,
+				progress: 0,
 				objective: 20,
 				unitName: 'times',
 			},
@@ -98,13 +100,24 @@ const initialState = {
 			id: '3',
 			date: new Date(),
 			name: 'Test task 3',
-			description: 'Test description',
+			description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
 			color: '#eb4034',
 			goal: {
-				progress: 3,
-				objective: 10,
-				unitName: 'times',
+				objective: [
+					{ id: '6', date: new Date(), name: 'subtask 1', color: '#000000', done: false },
+					{ id: '7', date: new Date(), name: 'subtask 3', color: '#000000', done: true },
+					{ id: '8', date: new Date(), name: 'subtask 4', color: '#000000', done: false },
+					{ id: '9', date: new Date(), name: 'subtask 2', color: '#000000', done: false },
+				],
+				unitName: 'subtasks',
 			},
+			done: false,
+		},
+		'4': {
+			id: '4',
+			date: new Date(),
+			name: 'Test task 4',
+			color: '#eb5055',
 			done: false,
 		},
 	},

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import StackHeaderContainer from '../../containers/StackHeaderContainer';
 import Routes from '../../routes';
 import { DrawerScreenHeader, ScreenNavigationProp } from '../../containers/Navigator';
 import TaskInfoScreen from '../TaskInfoScreen';
@@ -11,7 +10,12 @@ import DrawerHeaderContainer from '../../containers/DrawerHeaderContainer';
 import TasksHeaderWidgetContainer from '../../containers/TasksHeaderWidgetContainer';
 import TodayButtonContainer from '../../containers/TodayButtonContainer';
 
-const Stack = createStackNavigator();
+type NavigationParams = {
+	[Routes.TaskInfo]: { id: string },
+	[Routes.TasksList]: undefined,
+}
+
+const Stack = createStackNavigator<NavigationParams>();
 
 interface TasksScreenProps {
 	navigation: ScreenNavigationProp<Routes.Main>
@@ -31,15 +35,12 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ navigation, route }) => {
 		const focusedRoute = getFocusedRouteNameFromRoute(route);
 
 		if (focusedRoute === Routes.TaskInfo) {
-			navigation.setOptions({
-				header: props => <StackHeaderContainer {...props} />,
-			});
-
 			return;
 		}
 
 		navigation.setOptions({
 			header: mainScreenHeader,
+			headerTitle: '',
 			headerRight: () => <TodayButtonContainer />,
 		});
 	}, [navigation, route]);
