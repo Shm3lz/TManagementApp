@@ -44,8 +44,7 @@ export interface RegularTaskTemplate extends GenericTask<SimpleGoal | ComplexGoa
 }
 
 interface TasksState {
-	single: ById<Task>;
-	regular: ById<Task>;
+	instances: ById<Task>;
 	templates: ById<RegularTaskTemplate>
 }
 
@@ -53,25 +52,21 @@ export const addRegularTask = createAction<RegularTaskTemplate>('tasks/addRegula
 
 export const addSingleTask = createAction<Task>('tasks/addSingleTask');
 
-export const deleteSingleTask = createAction<string>('tasks/deleteSingleTask');
-
-export const deleteRegularTask = createAction<string>('tasks/deleteRegularTask');
+export const deleteTask = createAction<string>('tasks/deleteSingleTask');
 
 export const instantiateTemplate = createAction<{ id: string, date: Date }>('tasks/instantiateTemplate');
 
-export const editSingleTask = createAction<{ id: string, data: Partial<Task> }>('tasks/editSingleTask');
-
-export const editRegularTaskInstance = createAction<{ id: string, data: Partial<Omit<Task, 'templateId'>> }>('tasks/editRegularTaskInstance');
+export const editTask = createAction<{ id: string, data: Partial<Omit<Task, 'templateId'>> }>('tasks/editTask');
 
 export const setTaskDone = createAction<{ id: string, done?: boolean }>('tasks/setTaskDone');
 
 const initialState: TasksState = {
 	templates: {},
-	single: {
+	instances: {
 		'1': {
 			id: '1',
 			date: new Date(),
-			name: 'tst111111111111111111111111111111111111111111111111111111111111',
+			name: 'tst1111111111',
 			description: 'Test description',
 			color: '#000000',
 			goal: {
@@ -116,7 +111,7 @@ const initialState: TasksState = {
 			id: '4',
 			date: new Date(),
 			name: 'Test task 4',
-			color: '#eb5055',
+			color: '#eb0000',
 			goal: {
 				unitName: GoalUnit.Time,
 				objective: 70,
@@ -125,8 +120,6 @@ const initialState: TasksState = {
 			done: false,
 		},
 	},
-
-	regular: {},
 };
 
 export const tasksReducer = createReducer<TasksState>(initialState, builder => {
@@ -135,29 +128,20 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 	});
 
 	builder.addCase(addSingleTask, (state, action) => {
-		state.single[action.payload.id] = action.payload;
+		state.instances[action.payload.id] = action.payload;
 	});
 
-	builder.addCase(deleteSingleTask, (state, { payload: id }) => {
-		delete state.single[id];
-	});
+	builder.addCase(deleteTask, (state, { payload: id }) => {
+		const templateId = state.instances[id].templateId;
 
-	builder.addCase(editSingleTask, (state, action) => {
-		const task = state.single[action.payload.id];
+		if (!templateId) {
+			delete state.instances[id];
+			return;
+		}
 
-		state.single[action.payload.id] = {
-			...task,
-			...action.payload.data,
-		};
-	});
-
-	builder.addCase(deleteRegularTask, (state, { payload: id }) => {
-		const templateId = state.regular[id].templateId;
-
-		// Delete all instances
-		for (const task of Object.values(state.regular)) {
+		for (const task of Object.values(state.instances)) {
 			if (task.templateId === templateId && !task.done) {
-				delete state.regular[task.id];
+				delete state.instances[task.id];
 			}
 		}
 
@@ -165,10 +149,19 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 		templateId && delete state.templates[templateId];
 	});
 
+	builder.addCase(editTask, (state, action) => {
+		const task = state.instances[action.payload.id];
+
+		state.instances[action.payload.id] = {
+			...task,
+			...action.payload.data,
+		};
+	});
+
 	builder.addCase(instantiateTemplate, (state, action) => {
 		const instanceId = Date.now().toString();
 		const template = state.templates[action.payload.id];
-		state.regular[instanceId] = {
+		state.instances[instanceId] = {
 			...template,
 			id: instanceId,
 			date: action.payload.date,
@@ -179,8 +172,7 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 	builder.addCase(setTaskDone, (state, action) => {
 		const { id, done = true } = action.payload;
 
-		if (id in state.single) state.single[id].done = done;
-		if (id in state.regular) state.regular[id].done = done;
+		state.instances[id].done = done;
 	});
 });
 

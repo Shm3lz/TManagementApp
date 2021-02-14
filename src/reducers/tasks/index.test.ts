@@ -2,14 +2,13 @@ import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 import {
 	tasksReducer,
 	addSingleTask,
-	deleteSingleTask,
-	editSingleTask,
 	addRegularTask,
-	deleteRegularTask,
 	instantiateTemplate,
 	setTaskDone,
+	editTask,
 	Task,
 	RegularTaskTemplate,
+	deleteTask,
 } from './index';
 
 function createEmptyStore() {
@@ -47,16 +46,16 @@ describe('Tasks redux state', () => {
 		it('Adds single task to store', () => {
 			const store = createEmptyStore();
 			store.dispatch(addSingleTask(singleTask));
-			expect(store.getState().single[taskId]).toBe(singleTask);
+			expect(store.getState().instances[taskId]).toBe(singleTask);
 		});
 	});
 
-	describe('#editSingleTask', () => {
-		it('Edits single task by id', () => {
+	describe('#editTask', () => {
+		it('Edits task by id', () => {
 			const store = configureStore({
 				reducer: tasksReducer,
 				preloadedState: {
-					single: {
+					instances: {
 						[taskId]: singleTask,
 					},
 				},
@@ -68,38 +67,28 @@ describe('Tasks redux state', () => {
 				color: '#000000',
 			};
 
-			store.dispatch(editSingleTask({ id: taskId, data: newTaskData }));
-			const edited = store.getState().single[taskId];
+			store.dispatch(editTask({ id: taskId, data: newTaskData }));
+			const edited = store.getState().instances[taskId];
 			expect(edited.description).toBe('New test description');
 			expect(edited.color).toBe('#000000');
 		});
 	});
 
-	describe('#deleteSingleTask', () => {
+	describe('#deleteTask', () => {
 		it('Deletes single task from store by id', () => {
 			const store = configureStore({
 				reducer: tasksReducer,
 				preloadedState: {
-					single: {
+					instances: {
 						[taskId]: singleTask,
 					},
 				},
 				middleware: getDefaultMiddleware({ serializableCheck: false }),
 			});
-			store.dispatch(deleteSingleTask(taskId));
-			expect(store.getState().single[taskId]).toBeUndefined();
+			store.dispatch(deleteTask(taskId));
+			expect(store.getState().instances[taskId]).toBeUndefined();
 		});
-	});
 
-	describe('#addRegularTask', () => {
-		it('Adds regular task to store as template', () => {
-			const store = createEmptyStore();
-			store.dispatch(addRegularTask(regularTask));
-			expect(store.getState().templates[taskId]).toBe(regularTask);
-		});
-	});
-
-	describe('#deleteRegularTask', () => {
 		it('Deletes regular task instace from store with it\'s template', () => {
 			const instanceTaskId = `${taskId}_instance`;
 			const store = configureStore({
@@ -108,7 +97,7 @@ describe('Tasks redux state', () => {
 					templates: {
 						[taskId]: regularTask,
 					},
-					regular: {
+					instances: {
 						[instanceTaskId]: {
 							...singleTask,
 							id: instanceTaskId,
@@ -119,9 +108,17 @@ describe('Tasks redux state', () => {
 				middleware: getDefaultMiddleware({ serializableCheck: false }),
 			});
 
-			store.dispatch(deleteRegularTask(instanceTaskId));
+			store.dispatch(deleteTask(instanceTaskId));
 			expect(store.getState().templates[taskId]).toBeUndefined();
-			expect(store.getState().regular[instanceTaskId]).toBeUndefined();
+			expect(store.getState().instances[instanceTaskId]).toBeUndefined();
+		});
+	});
+
+	describe('#addRegularTask', () => {
+		it('Adds regular task to store as template', () => {
+			const store = createEmptyStore();
+			store.dispatch(addRegularTask(regularTask));
+			expect(store.getState().templates[taskId]).toBe(regularTask);
 		});
 	});
 
@@ -134,14 +131,14 @@ describe('Tasks redux state', () => {
 					templates: {
 						[taskId]: regularTask,
 					},
-					regular: {},
+					instances: {},
 				},
 				middleware: getDefaultMiddleware({ serializableCheck: false }),
 			});
 
 			store.dispatch(instantiateTemplate({ id: taskId, date }));
 
-			const instance = store.getState().regular[dateMockValue];
+			const instance = store.getState().instances[dateMockValue];
 			expect(instance).not.toBeUndefined();
 			expect(instance).toHaveProperty('templateId', taskId);
 		});
@@ -152,51 +149,48 @@ describe('Tasks redux state', () => {
 			const store = configureStore({
 				reducer: tasksReducer,
 				preloadedState: {
-					single: {
+					instances: {
 						[taskId]: singleTask,
 					},
-					regular: {},
 				},
 				middleware: getDefaultMiddleware({ serializableCheck: false }),
 			});
 
 			store.dispatch(setTaskDone({ id: taskId }));
-			expect(store.getState().single[taskId].done).toBeTruthy();
+			expect(store.getState().instances[taskId].done).toBeTruthy();
 		});
 
 		it('Changes single task\'s value', () => {
 			const store = configureStore({
 				reducer: tasksReducer,
 				preloadedState: {
-					single: {
+					instances: {
 						[taskId]: {
 							...singleTask,
 							done: true,
 						},
 					},
-					regular: {},
 				},
 				middleware: getDefaultMiddleware({ serializableCheck: false }),
 			});
 
 			store.dispatch(setTaskDone({ id: taskId, done: false }));
-			expect(store.getState().single[taskId].done).toBeFalsy();
+			expect(store.getState().instances[taskId].done).toBeFalsy();
 		});
 
 		it('Changes regular task\'s value', () => {
 			const store = configureStore({
 				reducer: tasksReducer,
 				preloadedState: {
-					regular: {
+					instances: {
 						[taskId]: singleTask,
 					},
-					single: {},
 				},
 				middleware: getDefaultMiddleware({ serializableCheck: false }),
 			});
 
 			store.dispatch(setTaskDone({ id: taskId, done: true }));
-			expect(store.getState().regular[taskId].done).toBeTruthy();
+			expect(store.getState().instances[taskId].done).toBeTruthy();
 		});
 	});
 });

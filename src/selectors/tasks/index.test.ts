@@ -1,13 +1,12 @@
 import {
-	getSingleTasksByDate,
-	getRegularTasksByDate,
+	getTasksByDate,
 	getTemplatesByDate,
 } from '.';
-import { RegularTaskInstance, RegularTaskTemplate, SingleTask } from '../../reducers/tasks';
+import { GoalUnit, RegularTaskTemplate, Task } from '../../reducers/tasks';
 import { State } from '../../store';
 import { WeekDay } from '../../util/types';
 
-function generateTask(id: string, date: Date = new Date()): SingleTask {
+function generateTask(id: string, date: Date = new Date()): Task {
 	return {
 		id,
 		date,
@@ -16,7 +15,8 @@ function generateTask(id: string, date: Date = new Date()): SingleTask {
 		color: '#ffffff',
 		goal: {
 			progress: 0,
-			goal: 5,
+			objective: 5,
+			unitName: GoalUnit.Simple,
 		},
 		done: false,
 	};
@@ -26,7 +26,7 @@ function generateRegularTask(
 	id: string,
 	templateId: string,
 	date: Date = new Date(),
-): RegularTaskInstance {
+): Task {
 	return {
 		...generateTask(id, date),
 		templateId,
@@ -51,53 +51,39 @@ describe('Tasks selectors', () => {
 		state = {
 			chosenDate: new Date(),
 			tasks: {
-				single: {},
-				regular: {},
+				instances: {},
 				templates: {},
 			},
 		};
 	});
 
-	describe('getSingleTasksByDate', () => {
-		it('Should return array of single tasks for specified date', () => {
-			state.tasks.single = {
+	describe('getTasksByDate', () => {
+		it('Should return array of tasks for specified date', () => {
+			state.tasks.instances = {
 				'1': generateTask('1', testDate),
 				'2': generateTask('2', testDate),
+				'5': generateRegularTask('5', '0', testDate),
 				'3': generateTask('3'),
 				'4': generateTask('4'),
 			};
 
-			expect(getSingleTasksByDate(state, testDate)).toStrictEqual([
-				state.tasks.single['1'], state.tasks.single['2'],
+			expect(getTasksByDate(state, testDate)).toStrictEqual([
+				state.tasks.instances['1'], state.tasks.instances['2'], state.tasks.instances['5'],
 			]);
 		});
 
 		it('Should return empty array if there\'s no tasks with specified date', () => {
-			state.tasks.single = {
+			state.tasks.instances = {
 				'1': generateTask('1'),
 				'2': generateTask('2'),
 				'3': generateTask('3'),
 				'4': generateTask('4'),
 			};
 
-			expect(getSingleTasksByDate(state, testDate)).toStrictEqual([]);
+			expect(getTasksByDate(state, testDate)).toStrictEqual([]);
 		});
 	});
 
-	describe('getRegularTasksByDate', () => {
-		it('Should return array of regular tasks for specified date', () => {
-			state.tasks.regular = {
-				'1': generateRegularTask('1', '0', testDate),
-				'2': generateRegularTask('2', '0'),
-				'3': generateRegularTask('3', '0',  testDate),
-				'4': generateRegularTask('4', '0'),
-			};
-
-			expect(getRegularTasksByDate(state, testDate)).toStrictEqual([
-				state.tasks.regular['1'], state.tasks.regular['3'],
-			]);
-		});
-	});
 
 	describe('getTemplatesByDate', () => {
 		it('Returns array of templates that are repeated on the same week day of date', () => {

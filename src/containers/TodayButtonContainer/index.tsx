@@ -14,11 +14,11 @@ interface StateProps {
 	chosenDate: Date;
 }
 
-const mapStateToProps: MapStateToProps<StateProps, any, State> = ({ chosenDate }) => ({
+const mapStateToProps: MapStateToProps<StateProps, unknown, State> = ({ chosenDate }) => ({
 	chosenDate,
 });
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, any> = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, unknown> = dispatch => ({
 	onPress: () => dispatch(setChosenDate(new Date())),
 });
 

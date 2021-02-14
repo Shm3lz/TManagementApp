@@ -2,7 +2,7 @@ import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux';
 
 import { State } from '../../store';
 import { setTaskDone, Task } from '../../reducers/tasks';
-import { getRegularTasksByDate, getSingleTasksByDate } from '../../selectors/tasks';
+import { getTasksByDate } from '../../selectors/tasks';
 import TasksList from '../../components/TasksList';
 
 interface StateProps {
@@ -21,10 +21,7 @@ interface OwnProps {
 
 const mapStateToProps: MapStateToProps<StateProps, OwnProps, State> = state => {
 	return {
-		tasks: [
-			...getSingleTasksByDate(state, state.chosenDate),
-			...getRegularTasksByDate(state, state.chosenDate),
-		].sort((a, b) => Number(a.done) - Number(b.done)),
+		tasks: getTasksByDate(state, state.chosenDate).sort((a, b) => Number(a.done) - Number(b.done)),
 	};
 };
 

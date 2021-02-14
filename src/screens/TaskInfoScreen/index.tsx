@@ -25,7 +25,7 @@ const mapStateToProps: MapStateToProps<StateProps, TaskInfoScreenProps, State> =
 	const { id } = props.route.params;
 
 	return {
-		selectedTask: state.tasks.regular[id] || state.tasks.single[id],
+		selectedTask: state.tasks.instances[id],
 	};
 };
 
