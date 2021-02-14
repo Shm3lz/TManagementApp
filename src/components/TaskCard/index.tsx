@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, ProgressBar } from 'react-native-paper';
 import { Task } from '../../reducers/tasks';
 import { StyleProp, StyleSheet, ViewStyle } from 'react-native';
-import { getGoalPercantage, getTaskProgressString } from '../../helpers/tasks';
+import { getGoalPercantage, getTaskSubtitle } from '../../helpers/tasks';
 
 interface TaskCardProps {
 	data: Task;
@@ -11,25 +11,20 @@ interface TaskCardProps {
 }
 
 const style = StyleSheet.create({
-	wrapper: {
-		margin: 10,
-	},
 	disabled: {
 		color: 'gray',
 		textDecorationLine: 'line-through',
 		textDecorationStyle: 'solid',
 	},
-	progressBar: {
-		zIndex: 100,
+	subtitle: {
+		marginBottom: 5,
+		marginLeft: 7,
 	},
 });
 
 const TaskCard: React.FC<TaskCardProps> = ({ data, style: wrapperStyle, onPress })=> {
-	const titleStyle = React.useMemo(() => ({ color: data.color }), [data.color]);
-
-	const subtitle = getTaskProgressString(data);
+	const titleStyle = React.useMemo(() => ({ color: data.color, paddingRight: 10 }), [data.color]);
 	const progressBar = React.useMemo(() => <ProgressBar
-		style={style.progressBar}
 		progress={Number(data.done) || data.goal && getGoalPercantage(data.goal)}
 		color={data.color}
 	/>, [data.done, data.color, data.goal]);
@@ -39,7 +34,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ data, style: wrapperStyle, onPress 
 			<Card.Title
 				titleStyle={data.done ? style.disabled : titleStyle}
 				title={data.name}
-				subtitle={subtitle}
+				subtitleStyle={style.subtitle}
+				subtitle={getTaskSubtitle(data)}
+				subtitleNumberOfLines={2}
 			/>
 			{data.goal && progressBar}
 		</Card>

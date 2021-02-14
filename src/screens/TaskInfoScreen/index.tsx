@@ -14,11 +14,11 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 interface TaskInfoScreenProps {
 	navigation: StackNavigationProp<{ [Routes.TaskInfo]: { id: string }}>;
-	route: Route<Routes.TaskInfo>;
+	route: Route<Routes.TaskInfo, { id: string}>;
 }
 
 interface StateProps {
-	selectedTask: Task;
+	selectedTask: Task & { templateId?: string; };
 }
 
 const mapStateToProps: MapStateToProps<StateProps, TaskInfoScreenProps, State> = (state, props) => {
@@ -38,7 +38,7 @@ const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps> = ({ navigation
 				headerTitle: '',
 				headerRight: () => <><MaterialIcons name="edit" size={24} color="white" /><MaterialIcons name="delete" size={24} color="white" /></>,
 			});
-	}, [navigation]);
+	}, [navigation, selectedTask.name]);
 
 	return (
 		<View>

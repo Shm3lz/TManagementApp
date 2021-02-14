@@ -1,15 +1,27 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 import { ById, WeekDay } from '../../util/types';
 
+export enum GoalUnit {
+	Time = 'minutes',
+	Simple = 'times',
+	Complex = 'subtasks',
+}
+
 export interface SimpleGoal {
 	progress: number;
 	objective: number;
-	unitName: string;
+	unitName: GoalUnit.Simple | string;
 }
 
 export interface ComplexGoal {
 	objective: Array<GenericTask<SimpleGoal>>,
-	unitName: 'subtasks';
+	unitName: GoalUnit.Complex;
+}
+
+export interface TimeGoal {
+	progress: number;
+	objective: number;
+	unitName: GoalUnit.Time;
 }
 
 export interface GenericTask<G> {
@@ -19,43 +31,27 @@ export interface GenericTask<G> {
 	description?: string;
 	color: string; // replace with color type
 	goal?: G;
+	timeSpent?: number; // minutes
 	done: boolean;
 }
 
-export type Task = GenericTask<SimpleGoal | ComplexGoal>;
-
-export type SingleTask = Task;
-
-export interface RegularTaskInstance extends Task {
-	templateId: string;
+export interface Task extends GenericTask<SimpleGoal | ComplexGoal | TimeGoal> {
+	templateId?: string;
 }
 
-export interface RegularTaskTemplate extends Task {
+export interface RegularTaskTemplate extends GenericTask<SimpleGoal | ComplexGoal | TimeGoal> {
 	repeat: WeekDay[];
 }
 
-/*
-// select date -> load instances -> load templates --close-->
-// -> for each done and edited tamplate create new instance -> save instances
-// ??? Load data from native storage when app is launched ??? save data when app is closed ???
-// ??? load data from native storage when date is selected (use it with redux) ??? save data when date is reselected ???
-const state = {
-	// Темплейты регулярных задач
-	templates: {},
-
-	// Экземпляры единичных и выполненных/измененных регулярных задач
-	instances: {},
-}
-*/
 interface TasksState {
-	single: ById<SingleTask>;
-	regular: ById<RegularTaskInstance>;
+	single: ById<Task>;
+	regular: ById<Task>;
 	templates: ById<RegularTaskTemplate>
 }
 
 export const addRegularTask = createAction<RegularTaskTemplate>('tasks/addRegularTask');
 
-export const addSingleTask = createAction<SingleTask>('tasks/addSingleTask');
+export const addSingleTask = createAction<Task>('tasks/addSingleTask');
 
 export const deleteSingleTask = createAction<string>('tasks/deleteSingleTask');
 
@@ -63,7 +59,9 @@ export const deleteRegularTask = createAction<string>('tasks/deleteRegularTask')
 
 export const instantiateTemplate = createAction<{ id: string, date: Date }>('tasks/instantiateTemplate');
 
-export const editSingleTask = createAction<{ id: string, data: Partial<SingleTask> }>('tasks/editSingleTask');
+export const editSingleTask = createAction<{ id: string, data: Partial<Task> }>('tasks/editSingleTask');
+
+export const editRegularTaskInstance = createAction<{ id: string, data: Partial<Omit<Task, 'templateId'>> }>('tasks/editRegularTaskInstance');
 
 export const setTaskDone = createAction<{ id: string, done?: boolean }>('tasks/setTaskDone');
 
@@ -102,6 +100,7 @@ const initialState: TasksState = {
 			name: 'Test task 3',
 			description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
 			color: '#eb4034',
+			timeSpent: 120,
 			goal: {
 				objective: [
 					{ id: '6', date: new Date(), name: 'subtask 1', color: '#000000', done: false },
@@ -109,7 +108,7 @@ const initialState: TasksState = {
 					{ id: '8', date: new Date(), name: 'subtask 4', color: '#000000', done: false },
 					{ id: '9', date: new Date(), name: 'subtask 2', color: '#000000', done: false },
 				],
-				unitName: 'subtasks',
+				unitName: GoalUnit.Complex,
 			},
 			done: false,
 		},
@@ -118,6 +117,11 @@ const initialState: TasksState = {
 			date: new Date(),
 			name: 'Test task 4',
 			color: '#eb5055',
+			goal: {
+				unitName: GoalUnit.Time,
+				objective: 70,
+				progress: 56,
+			},
 			done: false,
 		},
 	},
@@ -152,13 +156,13 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 
 		// Delete all instances
 		for (const task of Object.values(state.regular)) {
-			if (task.templateId == templateId && !task.done) {
+			if (task.templateId === templateId && !task.done) {
 				delete state.regular[task.id];
 			}
 		}
 
 		// Delete template
-		delete state.templates[templateId];
+		templateId && delete state.templates[templateId];
 	});
 
 	builder.addCase(instantiateTemplate, (state, action) => {

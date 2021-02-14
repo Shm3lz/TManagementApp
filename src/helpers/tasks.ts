@@ -1,4 +1,4 @@
-import { ComplexGoal, SimpleGoal, Task } from '../reducers/tasks';
+import { ComplexGoal, GoalUnit, SimpleGoal, Task } from '../reducers/tasks';
 
 export function countTasksDone(tasks: Task[]): number {
 	return tasks.reduce((acc, curr) => acc += Number(curr.done), 0);
@@ -13,10 +13,16 @@ export function getObjective(goal: SimpleGoal | ComplexGoal): number {
 	return Array.isArray(objective) ? objective.length : objective;
 }
 
-export function getTaskProgressString({ goal, done }: Task): string {
+export function getTaskProgressString({ goal }: Task): string {
 	if (!goal) return '';
 
-	return done ? '' : `${getGoalProgress(goal)} of ${getObjective(goal)} ${goal.unitName}`;
+	return `${getGoalProgress(goal)} of ${getObjective(goal)} ${goal.unitName}`;
+}
+
+export function getTaskSpentTime({ timeSpent }: Task): string {
+	if (!timeSpent) return '';
+
+	return `${timeSpent} minutes spent`;
 }
 
 export function getGoalProgress(goal: ComplexGoal | SimpleGoal): number {
@@ -29,4 +35,14 @@ export function getGoalProgress(goal: ComplexGoal | SimpleGoal): number {
 
 export function getGoalPercantage(goal: ComplexGoal | SimpleGoal): number {
 	return getGoalProgress(goal) / getObjective(goal);
+}
+
+export function getTaskSubtitle(task: Task): string {
+	return `${task.done ? '' : getTaskProgressString(task)}${task.timeSpent ? `\n${getTaskSpentTime(task)}` : ''}`;
+}
+
+export function hasTimeGoal({ goal }: Task): boolean {
+	if (!goal) return false;
+
+	return goal.unitName === GoalUnit.Time;
 }

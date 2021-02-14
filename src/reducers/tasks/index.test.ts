@@ -9,7 +9,6 @@ import {
 	instantiateTemplate,
 	setTaskDone,
 	Task,
-	SingleTask,
 	RegularTaskTemplate,
 } from './index';
 
@@ -64,7 +63,7 @@ describe('Tasks redux state', () => {
 				middleware: getDefaultMiddleware({ serializableCheck: false }),
 			});
 
-			const newTaskData: Partial<SingleTask> = {
+			const newTaskData: Partial<Task> = {
 				description: 'New test description',
 				color: '#000000',
 			};
