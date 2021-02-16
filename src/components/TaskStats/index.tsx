@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Button, Checkbox, Subheading, Title, Text } from 'react-native-paper';
+import { Button, Checkbox, Subheading, Title, Text, Portal } from 'react-native-paper';
 
 import { getTaskProgressString, getTaskSpentTime, hasComplexGoal, hasTimeGoal } from '../../helpers/tasks';
-import { ComplexGoal, Task } from '../../reducers/tasks';
+import { ComplexGoal, Goal, Task } from '../../reducers/tasks';
+import SetValueModal from '../SetValueModal';
 
 interface TaskStatsProps {
 	data: Task;
+	onGoalUpdate: (goalData: Goal) => void;
 }
 
 const styles = StyleSheet.create({
@@ -35,7 +37,12 @@ const styles = StyleSheet.create({
 	},
 });
 
-const TaskStats: React.FC<TaskStatsProps> = ({ data }) => {
+const TaskStats: React.FC<TaskStatsProps> = ({ data, onGoalUpdate }) => {
+	const [modalVisible, setModalVisible] = React.useState(false);
+	const handleModalClose = React.useCallback(() => setModalVisible(false), []);
+	const openModal = React.useCallback(() => setModalVisible(true), []);
+
+	let handleModalSubmit;
 	let goalSectionControls;
 
 	if (data.goal) {
@@ -63,13 +70,14 @@ const TaskStats: React.FC<TaskStatsProps> = ({ data }) => {
 				<View style={styles.sectionControls}>
 					<Button mode="contained">Add 1</Button>
 					{biggerStep > 1 && <Button mode="contained">Add {biggerStep}</Button>}
-					<Button mode="contained">Set manually</Button>
+					<Button mode="contained" onPress={openModal}>Set manually</Button>
 				</View>
 			);
+			// handleModalSubmit = () => onGoalUpdate()
 		}
 	}
 
-	return (<>
+	return (<View>
 		{data.goal && (
 			<View>
 				<Title>Goal</Title>
@@ -89,7 +97,15 @@ const TaskStats: React.FC<TaskStatsProps> = ({ data }) => {
 				</View>
 			</View>
 		)}
-	</>);
+		<Portal>
+			<SetValueModal
+				visible={modalVisible}
+				keyboardType="numeric"
+				onClose={handleModalClose}
+				onSubmit={handleModalSubmit}
+			/>
+		</Portal>
+	</View>);
 };
 
 export default TaskStats;

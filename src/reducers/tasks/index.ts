@@ -24,6 +24,8 @@ export interface TimeGoal {
 	unitName: GoalUnit.Time;
 }
 
+export type Goal = ComplexGoal | SimpleGoal | TimeGoal;
+
 export interface GenericTask<G> {
 	id: string; // is a timestamp actually
 	date: Date;
@@ -35,11 +37,11 @@ export interface GenericTask<G> {
 	done: boolean;
 }
 
-export interface Task extends GenericTask<SimpleGoal | ComplexGoal | TimeGoal> {
+export interface Task extends GenericTask<Goal> {
 	templateId?: string;
 }
 
-export interface RegularTaskTemplate extends GenericTask<SimpleGoal | ComplexGoal | TimeGoal> {
+export interface RegularTaskTemplate extends GenericTask<Goal> {
 	repeat: WeekDay[];
 }
 
