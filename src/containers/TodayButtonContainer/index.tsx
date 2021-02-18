@@ -5,6 +5,7 @@ import { setChosenDate } from '../../reducers/chosenDate';
 import TodayButton from '../../components/TodayButton';
 import { State } from '../../store';
 import { isToday } from 'date-fns';
+import { useTheme } from '@react-navigation/native';
 
 interface DispatchProps {
 	onPress: () => void;
@@ -22,9 +23,11 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, unknown> = dispatch 
 	onPress: () => dispatch(setChosenDate(new Date())),
 });
 
-const TodayButtonContainer: React.FC<StateProps & DispatchProps & { theme: ReactNativePaper.Theme }> = props => {
+const TodayButtonContainer: React.FC<StateProps & DispatchProps> = props => {
+	const theme = useTheme();
+
 	return (isToday(props.chosenDate) ?
-		<></> : <TodayButton onPress={props.onPress} theme={props.theme} />
+		<></> : <TodayButton onPress={props.onPress} theme={theme} />
 	);
 };
 

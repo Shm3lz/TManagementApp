@@ -1,4 +1,4 @@
-import { ComplexGoal, GoalUnit, SimpleGoal, Task } from '../reducers/tasks';
+import { ComplexGoal, Goal, GoalUnit, SimpleGoal, Task } from '../reducers/tasks';
 
 export function countTasksDone(tasks: Task[]): number {
 	return tasks.reduce((acc, curr) => acc += Number(curr.done), 0);
@@ -13,7 +13,7 @@ export function getObjective(goal: SimpleGoal | ComplexGoal): number {
 	return Array.isArray(objective) ? objective.length : objective;
 }
 
-export function getTaskProgressString({ goal }: Task): string {
+export function getGoalProgressString(goal?: Goal): string {
 	if (!goal) return '';
 
 	return `${getGoalProgress(goal)} of ${getObjective(goal)} ${goal.unitName}`;
@@ -38,7 +38,7 @@ export function getGoalPercantage(goal: ComplexGoal | SimpleGoal): number {
 }
 
 export function getTaskSubtitle(task: Task): string {
-	return `${task.done ? '' : getTaskProgressString(task)}${task.timeSpent ? `\n${getTaskSpentTime(task)}` : ''}`;
+	return `${task.done ? '' : getGoalProgressString(task.goal)}${task.timeSpent ? `\n${getTaskSpentTime(task)}` : ''}`;
 }
 
 export function hasTimeGoal({ goal }: Task): boolean {

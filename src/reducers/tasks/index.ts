@@ -1,4 +1,5 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
+import { hasComplexGoal } from '../../helpers/tasks';
 import { ById, WeekDay } from '../../util/types';
 
 export enum GoalUnit {
@@ -14,7 +15,8 @@ export interface SimpleGoal {
 }
 
 export interface ComplexGoal {
-	objective: Array<GenericTask<SimpleGoal>>,
+	objective: Array<GenericTask<undefined>>,
+	progress?: number;
 	unitName: GoalUnit.Complex;
 }
 
@@ -59,6 +61,8 @@ export const deleteTask = createAction<string>('tasks/deleteSingleTask');
 export const instantiateTemplate = createAction<{ id: string, date: Date }>('tasks/instantiateTemplate');
 
 export const editTask = createAction<{ id: string, data: Partial<Omit<Task, 'templateId'>> }>('tasks/editTask');
+
+export const updateGoal = createAction<{ id: string, goalData: Goal }>('tasks/updateGoal');
 
 export const setTaskDone = createAction<{ id: string, done?: boolean }>('tasks/setTaskDone');
 
@@ -157,6 +161,15 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 		state.instances[action.payload.id] = {
 			...task,
 			...action.payload.data,
+		};
+	});
+
+	builder.addCase(updateGoal, (state, action) => {
+		const task = state.instances[action.payload.id];
+
+		task.goal = {
+			...task.goal,
+			...action.payload.goalData,
 		};
 	});
 
