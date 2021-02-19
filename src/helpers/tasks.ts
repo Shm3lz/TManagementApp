@@ -1,22 +1,22 @@
-import { ComplexGoal, Goal, GoalUnit, SimpleGoal, Task } from '../reducers/tasks';
+import { GenericTask, Goal, GoalUnit, Task } from '../reducers/tasks';
+import { ById } from '../util/types';
 
-export function countTasksDone(tasks: Task[]): number {
-	return tasks.reduce((acc, curr) => acc += Number(curr.done), 0);
+export function countTasksDone(tasks: ById<Task>): number {
+	return Object.values(tasks).reduce((acc, curr) => acc += Number(curr.done), 0);
 }
 
 export function hasComplexGoal(task: Task): boolean {
-	return Array.isArray(task.goal?.objective);
-}
-
-export function getObjective(goal: SimpleGoal | ComplexGoal): number {
-	const { objective } = goal;
-	return Array.isArray(objective) ? objective.length : objective;
+	return Boolean(task.subtasks);
 }
 
 export function getGoalProgressString(goal?: Goal): string {
 	if (!goal) return '';
 
-	return `${getGoalProgress(goal)} of ${getObjective(goal)} ${goal.unitName}`;
+	return `${goal.progress} of ${goal.objective} ${goal.unitName}`;
+}
+
+export function getSubtasksProgressString(subtasks: ById<GenericTask<undefined>>): string {
+	return `${countTasksDone(subtasks)} of ${Object.values(subtasks).length} subtasks done`;
 }
 
 export function getTaskSpentTime({ timeSpent }: Task): string {
@@ -25,20 +25,33 @@ export function getTaskSpentTime({ timeSpent }: Task): string {
 	return `${timeSpent} minutes spent`;
 }
 
-export function getGoalProgress(goal: ComplexGoal | SimpleGoal): number {
-	if (Array.isArray(goal.objective)) {
-		return countTasksDone(goal.objective);
-	}
+export function getTaskProgressString(task: Task): string {
+	if (task.goal) return getGoalProgressString(task.goal);
 
-	return (goal as SimpleGoal).progress;
+	if (task.subtasks) return getSubtasksProgressString(task.subtasks);
+
+	return '';
 }
 
-export function getGoalPercantage(goal: ComplexGoal | SimpleGoal): number {
-	return getGoalProgress(goal) / getObjective(goal);
+/**
+ * Get % of task completion
+ * First priority - subtasks
+ * Second priority - goal
+ */
+export function getTaskPercentage(task: Task): number {
+	if (task.subtasks) return countTasksDone(task.subtasks) / Object.values(task.subtasks).length;
+
+	if (task.goal) return getGoalPercantage(task.goal);
+
+	return 0;
+}
+
+export function getGoalPercantage(goal: Goal): number {
+	return goal.progress / goal.objective;
 }
 
 export function getTaskSubtitle(task: Task): string {
-	return `${task.done ? '' : getGoalProgressString(task.goal)}${task.timeSpent ? `\n${getTaskSpentTime(task)}` : ''}`;
+	return `${task.done ? '' : getTaskProgressString(task)}${task.timeSpent ? `\n${getTaskSpentTime(task)}` : ''}`;
 }
 
 export function hasTimeGoal({ goal }: Task): boolean {

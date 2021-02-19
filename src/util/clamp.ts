@@ -1,7 +1,7 @@
 export default function (value: number, lowerBound: number, higherBound: number): number {
 	return value > higherBound
 		? higherBound
-		: value > lowerBound
+		: value < lowerBound
 			? lowerBound
 			: value;
 }

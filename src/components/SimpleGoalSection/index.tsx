@@ -3,12 +3,12 @@ import { View, StyleSheet } from 'react-native';
 import {Subheading, Title, Button } from 'react-native-paper';
 
 import { getGoalProgressString } from '../../helpers/tasks';
-import { SimpleGoal } from '../../reducers/tasks';
+import { Goal } from '../../reducers/tasks';
 
 interface SectionProps {
-	data: SimpleGoal;
+	data: Goal;
 	onGoalUpdate: (progress: number) => void;
-	// openModal: OpenModalProp;
+	onSetManualPress?: () => void;
 }
 
 const styles = StyleSheet.create({
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
 	},
 });
 
-const SimpleGoalSection: React.FC<SectionProps> = ({ data, onGoalUpdate }) => {
+const SimpleGoalSection: React.FC<SectionProps> = ({ data, onGoalUpdate, onSetManualPress }) => {
 	const { progress } = data;
 	const biggerStep = Math.ceil(data.objective as number / 8);
 
@@ -48,7 +48,7 @@ const SimpleGoalSection: React.FC<SectionProps> = ({ data, onGoalUpdate }) => {
 					<View style={styles.sectionControls}>
 						<Button mode="contained" onPress={incrementProgress}>Add 1</Button>
 						{biggerStep > 1 && <Button mode="contained" onPress={increaseProgress}>Add {biggerStep}</Button>}
-						<Button mode="contained">Set manually</Button>
+						<Button mode="contained" onPress={onSetManualPress}>Set manually</Button>
 					</View>
 				</View>
 			</View>

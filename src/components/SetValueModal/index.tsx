@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, KeyboardTypeOptions } from 'react-native';
-import { Modal, TextInput, Button, withTheme } from 'react-native-paper';
+import { StyleSheet, KeyboardTypeOptions } from 'react-native';
+import { Dialog, TextInput, Button, withTheme } from 'react-native-paper';
 
 interface SetValueModalProps {
 	visible: boolean;
@@ -31,18 +31,26 @@ const SetValueModal: React.FC<SetValueModalProps> = ({ visible, onClose, onSubmi
 	const [value, setValue] = React.useState('');
 
 	const handleSubmit = React.useCallback(() => onSubmit && onSubmit(value), [onSubmit, value]);
-	const containerBackgroundStyle = React.useMemo(() => ({ backgroundColor: theme.colors.background }), [theme]);
+
+	// const containerBackgroundStyle = React.useMemo(() => ({ backgroundColor: theme.colors.background }), [theme]);
 
 	return (
-		<Modal onDismiss={onClose} dismissable={true} visible={visible}>
-			<View style={[styles.container, containerBackgroundStyle]}>
-				<TextInput label="Set value" onSubmitEditing={handleSubmit} keyboardType={keyboardType} dense value={value} onChangeText={setValue} />
-				<View style={styles.buttonsContainer}>
-					<Button mode="contained" style={styles.button} onPress={onClose}>Cancel</Button>
-					<Button mode="contained" style={styles.button} onPress={handleSubmit}>Submit</Button>
-				</View>
-			</View>
-		</Modal>
+		<Dialog onDismiss={onClose} dismissable={true} visible={visible}>
+			<Dialog.Content>
+				<TextInput
+					label="Set value"
+					onSubmitEditing={handleSubmit}
+					keyboardType={keyboardType}
+					dense
+					value={value}
+					onChangeText={setValue}
+				/>
+			</Dialog.Content>
+			<Dialog.Actions>
+				<Button style={styles.button} onPress={onClose}>Cancel</Button>
+				<Button style={styles.button} onPress={handleSubmit}>Submit</Button>
+			</Dialog.Actions>
+		</Dialog>
 	);
 };
 

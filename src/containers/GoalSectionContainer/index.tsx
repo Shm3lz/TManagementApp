@@ -1,46 +1,29 @@
 import * as React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
+import { connect, MapDispatchToProps } from 'react-redux';
 
 import TimeGoalSection from '../../components/TimeGoalSection';
 import SimpleGoalSection from '../../components/SimpleGoalSection';
-import ComplexGoalSection from '../../components/ComplexGoalSection';
+import SubtasksSection from '../../components/SubtasksSection';
 
-import { ComplexGoal, SimpleGoal, Task, TimeGoal, updateGoal } from '../../reducers/tasks';
-import clamp from '../../util/clamp';
-import { hasComplexGoal, hasTimeGoal } from '../../helpers/tasks';
+import { Task, TimeGoal, updateGoal, updateSubtask } from '../../reducers/tasks';
+import { hasTimeGoal } from '../../helpers/tasks';
+import SetValueModal from '../../components/SetValueModal';
+import { Portal } from 'react-native-paper';
 
 interface OwnProps {
 	data: Task;
 }
 
 interface DispatchProps {
-	onSimpleGoalUpdate: (progress: number) => void;
-	onComplexGoalUpdate: (goalData: ComplexGoal) => void;
+	onGoalUpdate: (progress: number) => void;
+	onSubtaskUpdate: (id: string, done: boolean) => void;
 }
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (dispatch, { data }) => {
 	return {
-		onSimpleGoalUpdate: progress => {
-			if (!data.goal) return;
-
-			dispatch(updateGoal({
-				id: data.id,
-				goalData: {
-					...data.goal,
-					progress: clamp(progress, 0, (data.goal as SimpleGoal | TimeGoal).objective),
-				},
-			}));
-		},
-
-		onComplexGoalUpdate: goalData => {
-			if (!data.goal) return;
-
-			dispatch(updateGoal({
-				id: data.id,
-				goalData,
-			}));
-		},
+		onGoalUpdate: progress => dispatch(updateGoal({ id: data.id, progress })),
+		onSubtaskUpdate: (id, done) => dispatch(updateSubtask({ taskId: data.id, subtaskId: id, done })),
 	};
 };
 
@@ -58,29 +41,47 @@ const styles = StyleSheet.create({
 
 const GoalSectionContainer: React.FC<OwnProps & DispatchProps> = ({
 	data,
-	onComplexGoalUpdate,
-	onSimpleGoalUpdate,
+	onSubtaskUpdate,
+	onGoalUpdate,
 }) => {
-
+	const [modalVisible, setModalVisible] = React.useState(false);
+	const handleModalClose = React.useCallback(() => setModalVisible(false), []);
+	const openModal = React.useCallback(() => setModalVisible(true), []);
+	const handleModalSubmit = (v: string) => {
+		handleModalClose();
+		onGoalUpdate(Number(v));
+	};
 
 	return (
-		<View style={styles.wrapper}>
-			{hasComplexGoal(data) ?
-				<ComplexGoalSection
-					data={data.goal as ComplexGoal}
-					onGoalUpdate={onComplexGoalUpdate}
-				/>
-				: hasTimeGoal(data)
+		<>
+			<View style={styles.wrapper}>
+				{data.subtasks && (
+					<SubtasksSection
+						subtasks={data.subtasks}
+						onSubtaskUpdate={onSubtaskUpdate}
+					/>
+				)}
+				{hasTimeGoal(data)
 					? <TimeGoalSection
 						data={data.goal as TimeGoal}
-						onGoalUpdate={onSimpleGoalUpdate}
+						onSetManualPress={openModal}
 					/>
-					: <SimpleGoalSection
-						data={data.goal as SimpleGoal}
-						onGoalUpdate={onSimpleGoalUpdate}
+					: data.goal && <SimpleGoalSection
+						data={data.goal}
+						onSetManualPress={openModal}
+						onGoalUpdate={onGoalUpdate}
 					/>
-			}
-		</View>
+				}
+			</View>
+			<Portal>
+				<SetValueModal
+					keyboardType="numeric"
+					visible={modalVisible}
+					onClose={handleModalClose}
+					onSubmit={handleModalSubmit}
+				/>
+			</Portal>
+		</>
 	);
 };
 

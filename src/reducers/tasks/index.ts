@@ -1,5 +1,5 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
-import { hasComplexGoal } from '../../helpers/tasks';
+import clamp from '../../util/clamp';
 import { ById, WeekDay } from '../../util/types';
 
 export enum GoalUnit {
@@ -8,25 +8,17 @@ export enum GoalUnit {
 	Complex = 'subtasks',
 }
 
-export interface SimpleGoal {
+export interface Goal {
 	progress: number;
 	objective: number;
 	unitName: GoalUnit.Simple | string;
 }
 
-export interface ComplexGoal {
-	objective: Array<GenericTask<undefined>>,
-	progress?: number;
-	unitName: GoalUnit.Complex;
-}
-
-export interface TimeGoal {
+export interface TimeGoal extends Goal {
 	progress: number;
 	objective: number;
 	unitName: GoalUnit.Time;
 }
-
-export type Goal = ComplexGoal | SimpleGoal | TimeGoal;
 
 export interface GenericTask<G> {
 	id: string; // is a timestamp actually
@@ -35,6 +27,7 @@ export interface GenericTask<G> {
 	description?: string;
 	color: string; // replace with color type
 	goal?: G;
+	subtasks?: ById<GenericTask<undefined>>;
 	timeSpent?: number; // minutes
 	done: boolean;
 }
@@ -62,7 +55,9 @@ export const instantiateTemplate = createAction<{ id: string, date: Date }>('tas
 
 export const editTask = createAction<{ id: string, data: Partial<Omit<Task, 'templateId'>> }>('tasks/editTask');
 
-export const updateGoal = createAction<{ id: string, goalData: Goal }>('tasks/updateGoal');
+export const updateGoal = createAction<{ id: string, progress: number }>('tasks/updateGoal');
+
+export const updateSubtask = createAction<{ taskId: string, subtaskId: string, done: boolean }>('tasks/updateSubtask');
 
 export const setTaskDone = createAction<{ id: string, done?: boolean }>('tasks/setTaskDone');
 
@@ -102,14 +97,11 @@ const initialState: TasksState = {
 			description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
 			color: '#eb4034',
 			timeSpent: 120,
-			goal: {
-				objective: [
-					{ id: '6', date: new Date(), name: 'subtask 1', color: '#000000', done: false },
-					{ id: '7', date: new Date(), name: 'subtask 3', color: '#000000', done: true },
-					{ id: '8', date: new Date(), name: 'subtask 4', color: '#000000', done: false },
-					{ id: '9', date: new Date(), name: 'subtask 2', color: '#000000', done: false },
-				],
-				unitName: GoalUnit.Complex,
+			subtasks: {
+				'6': { id: '6', date: new Date(), name: 'subtask 1', color: '#000000', done: false },
+				'7': { id: '7', date: new Date(), name: 'subtask 3', color: '#000000', done: true },
+				'8': { id: '8', date: new Date(), name: 'subtask 4', color: '#000000', done: false },
+				'9': { id: '9', date: new Date(), name: 'subtask 2', color: '#000000', done: false },
 			},
 			done: false,
 		},
@@ -167,10 +159,15 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 	builder.addCase(updateGoal, (state, action) => {
 		const task = state.instances[action.payload.id];
 
-		task.goal = {
-			...task.goal,
-			...action.payload.goalData,
-		};
+		if (!task.goal) return;
+		task.goal.progress = clamp(action.payload.progress, 0, task.goal.objective);
+	});
+
+	builder.addCase(updateSubtask, (state, action) => {
+		const task = state.instances[action.payload.taskId];
+
+		if (!task.subtasks) return;
+		task.subtasks[action.payload.subtaskId].done = action.payload.done;
 	});
 
 	builder.addCase(instantiateTemplate, (state, action) => {

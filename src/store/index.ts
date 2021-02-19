@@ -9,5 +9,5 @@ const preloadedState = {};
 export const store = configureStore({
 	reducer,
 	preloadedState,
-	middleware: getDefaultMiddleware({ serializableCheck: false }),
+	middleware: getDefaultMiddleware({ serializableCheck: false, immutableCheck: false }),
 });
