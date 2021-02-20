@@ -20,13 +20,16 @@ const styles = StyleSheet.create({
 const TasksListScreen: React.FC = () => {
 	const navigation = useNavigation();
 
+	const handleAddButtonClick = () => navigation.navigate(Routes.CreateTask);
+
 	const openTaskInfo = React.useCallback((id: string) =>
-		navigation.navigate(Routes.TaskInfo, { id }), [navigation]);
+		navigation.navigate(Routes.TaskInfo, { id }), [navigation],
+	);
 
 	return (
 		<View style={styles.wrapper}>
 			<TasksListContainer openTaskInfo={openTaskInfo} />
-			<FAB style={styles.addBtn} icon="plus" />
+			<FAB style={styles.addBtn} onPress={handleAddButtonClick} icon="plus" />
 		</View>
 	);
 };

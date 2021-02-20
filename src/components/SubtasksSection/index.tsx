@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Checkbox, Subheading, Title, Text } from 'react-native-paper';
+import { Subheading, Title, Text, RadioButton } from 'react-native-paper';
 
 import { getSubtasksProgressString } from '../../helpers/tasks';
 import { GenericTask } from '../../reducers/tasks';
@@ -42,7 +42,7 @@ const SubtasksSection: React.FC<SectionProps> = ({ subtasks, onSubtaskUpdate }) 
 					<View>
 						{Object.values(subtasks).map((subtask, i) => (
 							<View style={styles.subtaskItem} key={i}>
-								<Checkbox onPress={() => toggleSubtaskDone(subtask.id)} status={subtask.done ? 'checked' : 'unchecked'} />
+								<RadioButton value={subtask.name} onPress={() => toggleSubtaskDone(subtask.id)} status={subtask.done ? 'checked' : 'unchecked'} />
 								<Text style={subtask.done && styles.subtaskDone}>{subtask.name}</Text>
 							</View>
 						))}
