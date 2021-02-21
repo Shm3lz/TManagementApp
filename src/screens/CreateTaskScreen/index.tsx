@@ -27,9 +27,10 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({ navigation }) => {
 			});
 	}, [navigation]);
 
+
 	return (
 		<View style={styles.wrapper}>
-			<TaskForm />
+			<TaskForm onSubmit={() => void(0)}/>
 		</View>
 	);
 };

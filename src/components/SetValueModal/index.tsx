@@ -30,7 +30,10 @@ const styles = StyleSheet.create({
 const SetValueModal: React.FC<SetValueModalProps> = ({ visible, onClose, onSubmit, theme, keyboardType }) => {
 	const [value, setValue] = React.useState('');
 
-	const handleSubmit = React.useCallback(() => onSubmit && onSubmit(value), [onSubmit, value]);
+	const handleSubmit = React.useCallback(() => {
+		if (onSubmit) onSubmit(value);
+		setValue('');
+	}, [onSubmit, value]);
 
 	// const containerBackgroundStyle = React.useMemo(() => ({ backgroundColor: theme.colors.background }), [theme]);
 

@@ -17,13 +17,14 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
-		width: '100%',
+		// width: '100%',
 	},
 	header: {
 		flexDirection: 'column',
 		height: 'auto',
 		paddingBottom: 5,
 		paddingTop: 5,
+		marginTop: 0,
 	},
 	menuAction: {
 		marginTop: 0,

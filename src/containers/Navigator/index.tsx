@@ -25,7 +25,6 @@ const Drawer = createDrawerNavigator<RootDrawerParamList>();
 
 const Navigator: React.FC<NavigatorProps> = ({ theme }) => {
 	const defaultHeader: DrawerScreenHeader = props => <DrawerHeaderContainer {...props} />;
-
 	return (
 		<NavigationContainer theme={theme}>
 			<Drawer.Navigator screenOptions={{ header: defaultHeader }} initialRouteName={Routes.Main}>

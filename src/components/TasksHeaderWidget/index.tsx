@@ -23,6 +23,13 @@ const style = StyleSheet.create({
 	tasksInfo: {
 		alignSelf: 'center',
 	},
+	dateText: {
+		borderRadius: 200,
+	},
+	icons: {
+		padding: 7,
+		borderRadius: 20,
+	},
 });
 
 const TasksHeader: React.FC<TasksHeader> = ({
@@ -49,18 +56,18 @@ const TasksHeader: React.FC<TasksHeader> = ({
 	return (
 		<View>
 			<View style={style.dayControl}>
-				<TouchableRipple onPress={onLeftPress}>
-					<AntDesign name="left" size={12} color={theme?.colors?.text} />
+				<TouchableRipple borderless style={style.icons} onPress={onLeftPress}>
+					<AntDesign name="left" size={24} color={theme?.colors?.text} />
 				</TouchableRipple>
-				<TouchableRipple onPress={onDatePress}>
+				<TouchableRipple borderless style={style.dateText} onPress={onDatePress}>
 					<Title style={titleStyle}>{dateText}</Title>
 				</TouchableRipple>
-				<TouchableRipple onPress={onRightPress}>
-					<AntDesign onPress={onRightPress} name="right" size={12} color={theme?.colors?.text} />
+				<TouchableRipple borderless style={style.icons} onPress={onRightPress}>
+					<AntDesign name="right" size={24} color={theme?.colors?.text} />
 				</TouchableRipple>
 			</View>
 			<View style={style.tasksInfo}>
-				<Subheading style={typographyStyle}>{tasksDoneNumber}/{tasksNumber} tasks done</Subheading>
+				{tasksNumber > 0 && <Subheading style={typographyStyle}>{tasksDoneNumber}/{tasksNumber} tasks done</Subheading>}
 			</View>
 		</View>
 	);

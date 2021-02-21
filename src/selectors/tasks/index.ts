@@ -11,6 +11,16 @@ export const getTasksByDate = createSelector<State, Date, Task[], Task[]>(
 	items => items,
 );
 
+export const countTasksDoneByDate = createSelector<State, Date, Task[], number>(
+	getTasksByDate,
+	tasks => tasks.filter(t => t.done).length,
+);
+
+export const countTasksByDate = createSelector<State, Date, Task[], number>(
+	getTasksByDate,
+	tasks => tasks.length,
+);
+
 export const getTemplatesByDate = createSelector<
 	State,
 	Date,
