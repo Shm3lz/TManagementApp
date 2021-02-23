@@ -6,11 +6,13 @@ import { StackNavigationProp } from '@react-navigation/stack';
 
 import Routes from '../../routes';
 import StackHeaderContainer from '../../containers/StackHeaderContainer';
-import { Task } from '../../reducers/tasks';
+import { Task, TaskInformation } from '../../reducers/tasks';
 import { connect, MapStateToProps } from 'react-redux';
 import { State } from '../../store';
 import { MaterialIcons } from '@expo/vector-icons';
 import GoalSectionContainer from '../../containers/GoalSectionContainer';
+import { WeekDay } from '../../util/types';
+import TimeSpentContainer from '../../containers/TimeSpentContainer';
 
 interface TaskInfoScreenProps {
 	navigation: StackNavigationProp<{ [Routes.TaskInfo]: { id: string } }>;
@@ -19,13 +21,19 @@ interface TaskInfoScreenProps {
 
 interface StateProps {
 	selectedTask: Task;
+	repeat: WeekDay[],
 }
 
 const mapStateToProps: MapStateToProps<StateProps, TaskInfoScreenProps, State> = (state, props) => {
 	const { id } = props.route.params;
 
+	const task = state.tasks.instances[id];
+	const repeat = task.templateId ?
+		state.tasks.templates[task.templateId].repeat : [];
+
 	return {
-		selectedTask: state.tasks.instances[id],
+		selectedTask: task,
+		repeat,
 	};
 };
 
@@ -45,7 +53,7 @@ const styles = StyleSheet.create({
 	},
 });
 
-const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps> = ({ navigation, selectedTask }) => {
+const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps> = ({ navigation, selectedTask, repeat }) => {
 	React.useLayoutEffect(() => {
 		navigation
 			.dangerouslyGetParent()
@@ -58,11 +66,10 @@ const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps> = ({ navigation
 
 	return (
 		<View style={styles.wrapper}>
-			<Title>Type</Title>
-			<Paragraph style={styles.paragraph}>{selectedTask.templateId ? 'Regular task' : 'Single task'}</Paragraph>
 			<Title>Description</Title>
 			<Paragraph style={styles.paragraph}>{selectedTask.description || 'No description.'}</Paragraph>
 			<GoalSectionContainer data={selectedTask} />
+			{typeof selectedTask.timeSpent !== 'undefined' && <TimeSpentContainer data={selectedTask} />}
 		</View>
 	);
 };

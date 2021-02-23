@@ -20,23 +20,22 @@ export interface TimeGoal extends Goal {
 	unitName: GoalUnit.Time;
 }
 
-export interface GenericTask<G> {
+export interface Task {
 	id: string; // is a timestamp actually
+	templateId?: string;
 	date: Date;
 	name: string;
 	description?: string;
 	color: string; // replace with color type
-	goal?: G;
-	subtasks?: ById<GenericTask<undefined>>;
+	goal?: Goal;
+	subtasks?: ById<Task>;
 	timeSpent?: number; // minutes
 	done: boolean;
 }
 
-export interface Task extends GenericTask<Goal> {
-	templateId?: string;
-}
+export type TaskInformation = Omit<RegularTaskTemplate, 'id' | 'templateId' | 'done'>;
 
-export interface RegularTaskTemplate extends GenericTask<Goal> {
+export interface RegularTaskTemplate extends Task {
 	repeat: WeekDay[];
 }
 
@@ -58,6 +57,8 @@ export const editTask = createAction<{ id: string, data: Partial<Omit<Task, 'tem
 export const updateGoal = createAction<{ id: string, progress: number }>('tasks/updateGoal');
 
 export const updateSubtask = createAction<{ taskId: string, subtaskId: string, done: boolean }>('tasks/updateSubtask');
+
+export const setSpentTime = createAction<{ id: string, timestamp: number }>('tasks/setSpentTime');
 
 export const setTaskDone = createAction<{ id: string, done?: boolean }>('tasks/setTaskDone');
 
@@ -161,6 +162,10 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 
 		if (!task.goal) return;
 		task.goal.progress = clamp(action.payload.progress, 0, task.goal.objective);
+	});
+
+	builder.addCase(setSpentTime, (state, action) => {
+		state.instances[action.payload.id].timeSpent = action.payload.timestamp;
 	});
 
 	builder.addCase(updateSubtask, (state, action) => {

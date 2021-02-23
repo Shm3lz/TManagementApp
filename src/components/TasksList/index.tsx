@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import { SwipeRow } from 'react-native-swipe-list-view';
 
 import TaskCard from '../TaskCard';
@@ -18,11 +18,14 @@ const style = StyleSheet.create({
 	swipeRow: {
 		margin,
 	},
+	scrollView: {
+		paddingBottom: 10,
+	},
 });
 
 const TasksList: React.FC<TasksListProps> = ({ tasks, onTaskDone, onTaskUndone, onCardPress }) => {
 	return (
-		<View>
+		<ScrollView style={style.scrollView} showsVerticalScrollIndicator={false}>
 			{tasks.map((data, i) => (
 				<SwipeRow
 					style={style.swipeRow}
@@ -45,10 +48,10 @@ const TasksList: React.FC<TasksListProps> = ({ tasks, onTaskDone, onTaskUndone, 
 					onRowDidOpen={() => onTaskDone(data.id)}
 				>
 					<View></View>
-					<TaskCard onPress={onCardPress.bind(null, data.id)}data={data} />
+					<TaskCard onPress={onCardPress.bind(null, data.id)} data={data} />
 				</SwipeRow>
 			))}
-		</View>
+		</ScrollView>
 	);
 };
 

@@ -1,8 +1,8 @@
-import { GenericTask, Goal, GoalUnit, Task } from '../reducers/tasks';
+import { Goal, GoalUnit, Task, TaskInformation } from '../reducers/tasks';
 import { ById } from '../util/types';
 
 export function countTasksDone(tasks: ById<Task>): number {
-	return Object.values(tasks).reduce((acc, curr) => acc += Number(curr.done), 0);
+	return Object.values(tasks).filter(t => t.done).length;
 }
 
 export function hasComplexGoal(task: Task): boolean {
@@ -15,12 +15,12 @@ export function getGoalProgressString(goal?: Goal): string {
 	return `${goal.progress} of ${goal.objective} ${goal.unitName}`;
 }
 
-export function getSubtasksProgressString(subtasks: ById<GenericTask<undefined>>): string {
+export function getSubtasksProgressString(subtasks: ById<Task>): string {
 	return `${countTasksDone(subtasks)} of ${Object.values(subtasks).length} subtasks done`;
 }
 
 export function getTaskSpentTime({ timeSpent }: Task): string {
-	if (!timeSpent) return '';
+	if (typeof timeSpent === 'undefined') return '';
 
 	return `${timeSpent} minutes spent`;
 }
@@ -54,7 +54,7 @@ export function getTaskSubtitle(task: Task): string {
 	return `${task.done ? '' : getTaskProgressString(task)}${task.timeSpent ? `\n${getTaskSpentTime(task)}` : ''}`;
 }
 
-export function hasTimeGoal({ goal }: Task): boolean {
+export function hasTimeGoal({ goal }: TaskInformation | Task): boolean {
 	if (!goal) return false;
 
 	return goal.unitName === GoalUnit.Time;

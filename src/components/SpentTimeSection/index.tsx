@@ -7,6 +7,7 @@ import { Task } from '../../reducers/tasks';
 
 interface SectionProps {
 	data: Task;
+	onSetManualPress?: () => void;
 }
 
 const styles = StyleSheet.create({
@@ -23,13 +24,13 @@ const styles = StyleSheet.create({
 	},
 });
 
-const SpentTimeSection: React.FC<SectionProps> = ({ data }) => {
+const SpentTimeSection: React.FC<SectionProps> = ({ data, onSetManualPress }) => {
 	return (
 		<View>
 			<Title>Time spent</Title>
 			<Subheading style={styles.paragraph}>You have {getTaskSpentTime(data)} doing this task.</Subheading>
 			<View style={styles.sectionControls}>
-				<Button mode="contained">Set manually</Button>
+				<Button mode="contained" onPress={onSetManualPress}>Set manually</Button>
 				<Button mode="contained">Run stopwatch</Button>
 			</View>
 		</View>

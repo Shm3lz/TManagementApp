@@ -3,11 +3,11 @@ import { View, StyleSheet } from 'react-native';
 import { Subheading, Title, Text, RadioButton } from 'react-native-paper';
 
 import { getSubtasksProgressString } from '../../helpers/tasks';
-import { GenericTask } from '../../reducers/tasks';
+import { Task } from '../../reducers/tasks';
 import { ById } from '../../util/types';
 
 interface SectionProps {
-	subtasks: ById<GenericTask<undefined>>;
+	subtasks: ById<Task>;
 	onSubtaskUpdate: (id: string, done: boolean) => void;
 }
 

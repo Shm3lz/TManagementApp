@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Appbar, useTheme } from 'react-native-paper';
 import { View, StyleSheet } from 'react-native';
 import { IconSource } from 'react-native-paper/lib/typescript/src/components/Icon';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface HeaderProps {
 	footerWidget?: React.ReactNode;
@@ -44,19 +45,21 @@ const Header: React.FC<HeaderProps> = ({
 	const theme = useTheme();
 
 	return (
-		<Appbar.Header style={styles.header}>
-			<View style={styles.topView}>
-				{actionIcon && <Appbar.Action
-					color={theme.colors.surface}
-					style={styles.menuAction}
-					icon={actionIcon}
-					onPress={onMenuActionPress}
-				/>}
-				<Appbar.Content title={title} />
-				{rightWidget}
-			</View>
-			{footerWidget}
-		</Appbar.Header>
+		<SafeAreaView>
+			<Appbar.Header statusBarHeight={50} style={styles.header}>
+				<View style={styles.topView}>
+					{actionIcon && <Appbar.Action
+						color={theme.colors.surface}
+						style={styles.menuAction}
+						icon={actionIcon}
+						onPress={onMenuActionPress}
+					/>}
+					<Appbar.Content title={title} />
+					{rightWidget}
+				</View>
+				{footerWidget}
+			</Appbar.Header>
+		</SafeAreaView>
 	);
 };
 

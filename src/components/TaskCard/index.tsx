@@ -30,7 +30,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ data, style: wrapperStyle, onPress 
 	/>, [data]);
 
 	return (
-		<Card onPress={onPress} style={wrapperStyle} elevation={10}>
+		<Card onPress={onPress} style={wrapperStyle} elevation={5}>
 			<Card.Title
 				titleStyle={data.done ? style.disabled : titleStyle}
 				title={data.name}

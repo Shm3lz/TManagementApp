@@ -27,14 +27,12 @@ const styles = StyleSheet.create({
 const TimeGoalSection: React.FC<SectionProps> = ({ data, onSetManualPress }) => {
 	return (
 		<View>
-			<View>
-				<Title>Time goal</Title>
-				<View style={styles.paragraph}>
-					<Subheading>{getGoalProgressString(data)}</Subheading>
-					<View style={styles.sectionControls}>
-						<Button mode="contained" onPress={onSetManualPress}>Set manually</Button>
-						<Button mode="contained">Run stopwatch</Button>
-					</View>
+			<Title>Time goal</Title>
+			<View style={styles.paragraph}>
+				<Subheading>{getGoalProgressString(data)}</Subheading>
+				<View style={styles.sectionControls}>
+					<Button mode="contained" onPress={onSetManualPress}>Set manually</Button>
+					<Button mode="contained">Run stopwatch</Button>
 				</View>
 			</View>
 		</View>

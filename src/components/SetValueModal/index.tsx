@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, KeyboardTypeOptions } from 'react-native';
-import { Dialog, TextInput, Button, withTheme } from 'react-native-paper';
+import { Dialog, TextInput, Button, withTheme, HelperText } from 'react-native-paper';
 
 interface SetValueModalProps {
 	visible: boolean;
@@ -31,14 +31,19 @@ const SetValueModal: React.FC<SetValueModalProps> = ({ visible, onClose, onSubmi
 	const [value, setValue] = React.useState('');
 
 	const handleSubmit = React.useCallback(() => {
-		if (onSubmit) onSubmit(value);
+		if (onSubmit && value.trim()) onSubmit(value.trim());
 		setValue('');
 	}, [onSubmit, value]);
 
+	const handleClose = React.useCallback(() => {
+		if (onClose) onClose();
+
+		setValue('');
+	}, [onClose]);
 	// const containerBackgroundStyle = React.useMemo(() => ({ backgroundColor: theme.colors.background }), [theme]);
 
 	return (
-		<Dialog onDismiss={onClose} dismissable={true} visible={visible}>
+		<Dialog onDismiss={handleClose} dismissable={true} visible={visible}>
 			<Dialog.Content>
 				<TextInput
 					label="Set value"
@@ -50,7 +55,7 @@ const SetValueModal: React.FC<SetValueModalProps> = ({ visible, onClose, onSubmi
 				/>
 			</Dialog.Content>
 			<Dialog.Actions>
-				<Button style={styles.button} onPress={onClose}>Cancel</Button>
+				<Button style={styles.button} onPress={handleClose}>Cancel</Button>
 				<Button style={styles.button} onPress={handleSubmit}>Submit</Button>
 			</Dialog.Actions>
 		</Dialog>

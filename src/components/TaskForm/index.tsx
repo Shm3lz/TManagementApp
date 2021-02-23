@@ -2,36 +2,39 @@ import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import {
 	Button,
-	Checkbox,
 	Chip,
 	Divider,
-	IconButton,
-	Portal,
 	Subheading,
 	Surface,
 	Switch,
 	TextInput,
 	Title,
 } from 'react-native-paper';
+import useSwitch from '../../hooks/useSwitch';
 
-import { GoalUnit, Task } from '../../reducers/tasks';
+import { GoalUnit, Task, TaskInformation } from '../../reducers/tasks';
 import { ById, WeekDay } from '../../util/types';
-import SetValueModal from '../SetValueModal';
+import RepeatDaysSection from './RepeatDaysSection';
+import SubtasksForm from './SubtasksForm';
 
 interface TaskFormProps {
-	initialValue?: Task;
-	onSubmit: () => void;
+	initialValue?: TaskInformation;
+	onSubmit: (task: TaskInformation) => void;
 }
 
 const styles = StyleSheet.create({
 	field: {
 		marginBottom: 15,
 	},
+	goalInput: {
+		maxWidth: '50%',
+	},
 	section: {
 		elevation: 3,
 		padding: 10,
 		borderRadius: 10,
 		marginBottom: 15,
+		marginHorizontal: 3,
 	},
 	sectionTitle: {
 		display: 'flex',
@@ -54,26 +57,14 @@ const styles = StyleSheet.create({
 	marginLeft: {
 		marginLeft: 10,
 	},
-	subtask: {
-		display: 'flex',
-		flexDirection: 'row',
-		justifyContent: 'flex-start',
-		alignItems: 'center',
-		elevation: 1,
-		borderRadius: 10,
-		margin: 5,
-	},
-	addSubtaskBtn: {
-		display: 'flex',
-		flexDirection: 'row',
-		margin: 10,
-	},
 	divider: {
 		marginTop: 10,
 		marginBottom: 3,
 	},
-	deleteSubtaskBtn: {
-		marginLeft: 'auto',
+	fab: {
+		position: 'absolute',
+		bottom: '5%',
+		right: '5%',
 	},
 });
 
@@ -83,25 +74,35 @@ enum GoalChip {
 	Subtask,
 }
 
-const weekDays = {
-	monday: WeekDay.Monday,
-	tuesday: WeekDay.Tuesday,
-	wednesday: WeekDay.Wednesday,
-	thursday: WeekDay.Thursday,
-	friday: WeekDay.Friday,
-	saturday: WeekDay.Saturday,
-	sunday: WeekDay.Sunday,
-};
+function useTextInput(value = '', hasError?: (s: string) => boolean) {
+	const [text, setText] = React.useState(value);
+	const [error, setError] = React.useState(false);
+
+	return {
+		text,
+		checkErrors: () => hasError && setError(hasError(text)),
+		bind: {
+			defaultValue: value,
+			onTextChange: (newVal: string) => {
+				setText(newVal);
+				hasError && setError(hasError(text));
+			},
+			error,
+		},
+	};
+}
+
+function isEmpty(s: string): boolean {
+	return s.trim() === '';
+}
+
+const defaultInfo = { date: new Date(), name: 'New task', color: 'black', repeat: [] };
 
 const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
-	const [formData, setFormData] = React.useState({} as Task);
-	const handleTextInputChange =
-		(fieldName: string) =>
-			(text: string) =>
-				setFormData({ ...formData, [fieldName]: text });
+	const { text: taskName, bind: taskNameProps } = useTextInput(initialValue?.name, isEmpty);
+	const { text: description, bind: descriptionProps } = useTextInput(initialValue?.description);
 
-	const [hasGoal, setHasGoal] = React.useState(false);
-	const handleSwitchToggle = () => setHasGoal(!hasGoal);
+	const [hasGoal, toggleGoalSwitch] = useSwitch(Boolean(initialValue?.goal));
 
 	const [currentGoal, setCurrentGoal] = React.useState(GoalChip.Simple);
 	const handleChipPress = (chip: GoalChip) => () => {
@@ -119,162 +120,131 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 	const handleUnitNameChange = React.useCallback((value: string) => setUnitName(value), [setUnitName]);
 
 	const [subtasks, setSubtasks] = React.useState({} as ById<Task>);
+	const handleChangeSubtasks = (sb: ById<Task>) => setSubtasks(sb);
 
-	const [modalVisible, setModalVisible] = React.useState(false);
-	const handleModalClose = React.useCallback(() => setModalVisible(false), [setModalVisible]);
-	const openModal = React.useCallback(() => setModalVisible(true), [setModalVisible]);
-	const handleModalSubmit = (value: string) => {
-		const id = Date.now();
+	const [timeStatsSwitch, toggleTimeSwitch] = useSwitch(Boolean(initialValue?.timeSpent));
 
-		setSubtasks({
-			...subtasks,
-			[id]: {
-				id,
-				name: value,
-			},
-		});
-		setModalVisible(false);
-	};
-	const handleDeleteSubtask = (id: string) => {
-		const { [id]: _, ...rest } = subtasks;
-
-		setSubtasks(rest);
-	};
-
-	const [timeStatsSwitch, setTimeStatsSwitch] = React.useState(false);
-	const handleTimeSwitchToggle = () => setTimeStatsSwitch(!timeStatsSwitch);
-
-	const [repeatSwitch, setRepeatSwitch] = React.useState(false);
-	const handleRepeatSwitchToggle = () => setRepeatSwitch(!repeatSwitch);
 	const [repeatDays, setRepeatDays] = React.useState([] as WeekDay[]);
-	const handleRepeatDayToggle = (day: WeekDay) => {
-		if (repeatDays.includes(day)) {
-			setRepeatDays(repeatDays.filter(d => d !== day));
-			return;
+	const handleChangeRepeatDays = React.useCallback((days: Array<WeekDay>) => setRepeatDays(days), [setRepeatDays]);
+
+	const handleFormSubmit = () => {
+		const task = {
+			...defaultInfo,
+			...initialValue,
+			name: taskName,
+			description,
+		};
+
+		if (hasGoal) {
+			if (currentGoal === GoalChip.Subtask) {
+				task.subtasks = subtasks;
+			} else {
+				task.goal = {
+					progress: 0,
+					objective,
+					unitName,
+				};
+			}
 		}
 
-		setRepeatDays([...repeatDays, day]);
+		if (timeStatsSwitch) {
+			task.timeSpent = 0;
+		}
+
+		task.repeat = repeatDays;
+
+		onSubmit(task);
 	};
 
 	return (
-		<ScrollView showsVerticalScrollIndicator={false}>
-			<Surface style={styles.section}>
-				<Title style={styles.sectionTitle}>Information about task</Title>
-				<TextInput
-					style={styles.field}
-					defaultValue={initialValue?.name}
-					onChangeText={handleTextInputChange('name')}
-					dense
-					label="Task name"
-				/>
-
-				<TextInput
-					style={styles.field}
-					defaultValue={initialValue?.name}
-					onChangeText={handleTextInputChange('description')}
-					label="Description"
-					multiline
-					numberOfLines={5}
-				/>
-			</Surface>
-
-			<Surface style={styles.section}>
-				<View style={styles.sectionTitle}>
-					<Title>Goal</Title>
-					<Switch
-						onValueChange={handleSwitchToggle}
-						value={hasGoal}
+		<View>
+			<ScrollView style={{ height: '100%' }} showsVerticalScrollIndicator={false}>
+				<Surface style={styles.section}>
+					<Title style={styles.sectionTitle}>Information about task</Title>
+					<TextInput
+						style={styles.field}
+						{...taskNameProps}
+						dense
+						label="Task name"
 					/>
-				</View>
-				{hasGoal &&
-					<View>
-						<View style={styles.goalChips}>
-							<Chip onPress={handleChipPress(GoalChip.Simple)} selected={currentGoal === GoalChip.Simple}>Simple goal</Chip>
-							<Chip onPress={handleChipPress(GoalChip.Time)} selected={currentGoal === GoalChip.Time}>Time goal</Chip>
-							<Chip onPress={handleChipPress(GoalChip.Subtask)} selected={currentGoal === GoalChip.Subtask}>Subtasks</Chip>
-						</View>
-						<Divider style={styles.divider} />
-						{currentGoal === GoalChip.Simple &&
-							<View style={styles.goalForm}>
-								<TextInput
-									defaultValue={String(objective)}
-									keyboardType="numeric"
-									style={styles.marginLeft}
-									dense
-									onChangeText={handleObjectiveChange}
-								/>
-								<TextInput
-									defaultValue={unitName}
-									style={styles.marginLeft}
-									dense
-									onChangeText={handleUnitNameChange}
-								/>
+
+					<TextInput
+						style={styles.field}
+						{...descriptionProps}
+						label="Description"
+						multiline
+						numberOfLines={4}
+					/>
+				</Surface>
+
+				<Surface style={styles.section}>
+					<View style={styles.sectionTitle}>
+						<Title>Goal</Title>
+						<Switch
+							onValueChange={toggleGoalSwitch}
+							value={hasGoal}
+						/>
+					</View>
+					{hasGoal &&
+						<View>
+							<View style={styles.goalChips}>
+								<Chip onPress={handleChipPress(GoalChip.Simple)} selected={currentGoal === GoalChip.Simple}>Simple goal</Chip>
+								<Chip onPress={handleChipPress(GoalChip.Time)} selected={currentGoal === GoalChip.Time}>Time goal</Chip>
+								<Chip onPress={handleChipPress(GoalChip.Subtask)} selected={currentGoal === GoalChip.Subtask}>Subtasks</Chip>
 							</View>
-						}
-						{currentGoal === GoalChip.Time &&
-							<View style={styles.goalForm}>
-								<TextInput keyboardType="numeric" style={styles.marginLeft} onChangeText={handleObjectiveChange} dense>0</TextInput>
-								<Subheading style={styles.marginLeft}>minutes</Subheading>
-							</View>
-						}
-						{currentGoal === GoalChip.Subtask &&
-							<View>
-								<View style={styles.addSubtaskBtn}>
-									<Button mode="contained" onPress={openModal}>
-										Add
-									</Button>
-								</View>
-								{Object.values(subtasks).map((subtask, i) =>
-									<Surface style={styles.subtask} key={i}>
-										<Checkbox.IOS status="checked" />
-										<Subheading>{subtask.name}</Subheading>
-										<IconButton
-											onPress={() => handleDeleteSubtask(subtask.id)}
-											style={styles.deleteSubtaskBtn}
-											icon="delete"
-										/>
-									</Surface>,
-								)}
-								<Portal>
-									<SetValueModal
-										visible={modalVisible}
-										onClose={handleModalClose}
-										onSubmit={handleModalSubmit}
+							<Divider style={styles.divider} />
+							{currentGoal === GoalChip.Simple &&
+								<View style={styles.goalForm}>
+									<TextInput
+										defaultValue={String(objective)}
+										keyboardType="numeric"
+										style={[styles.marginLeft, styles.goalInput]}
+										dense
+										onChangeText={handleObjectiveChange}
 									/>
-								</Portal>
-							</View>
-						}
-					</View>
-				}
-			</Surface>
+									<TextInput
+										defaultValue={unitName}
+										style={[styles.marginLeft, styles.goalInput]}
+										dense
+										onChangeText={handleUnitNameChange}
+									/>
+								</View>
+							}
+							{currentGoal === GoalChip.Time &&
+								<View style={styles.goalForm}>
+									<TextInput
+										defaultValue={String(objective)}
+										keyboardType="numeric"
+										style={[styles.marginLeft, styles.goalInput]}
+										onChangeText={handleObjectiveChange}
+										dense
+									/>
+									<Subheading style={styles.marginLeft}>minutes</Subheading>
+								</View>
+							}
+							{currentGoal === GoalChip.Subtask &&
+								<SubtasksForm onChange={handleChangeSubtasks} />
+							}
+						</View>
+					}
+				</Surface>
 
-			<Surface style={styles.section}>
-				<View style={styles.sectionTitle}>
-					<Title>Time statistics</Title>
-					<Switch
-						onValueChange={handleTimeSwitchToggle}
-						value={timeStatsSwitch}
-					/>
-				</View>
-			</Surface>
-
-			<Surface style={styles.section}>
-				<View style={styles.sectionTitle}>
-					<Title>Repeat</Title>
-					<Switch
-						onValueChange={handleRepeatSwitchToggle}
-						value={repeatSwitch}
-					/>
-				</View>
-				{repeatSwitch &&
-					<View style={styles.goalChips}>
-						{Object.values(weekDays).map((day, i) => (
-							<Chip selected={repeatDays.includes(day)} onPress={() => handleRepeatDayToggle(day)} mode="outlined" key={i}>{day}</Chip>
-						))}
+				<Surface style={styles.section}>
+					<View style={styles.sectionTitle}>
+						<Title>Time statistics</Title>
+						<Switch
+							onValueChange={toggleTimeSwitch}
+							value={timeStatsSwitch}
+						/>
 					</View>
-				}
-			</Surface>
-		</ScrollView>
+				</Surface>
+
+				<Surface style={styles.section}>
+					<RepeatDaysSection onChange={handleChangeRepeatDays} />
+				</Surface>
+				<Button onPress={handleFormSubmit} mode="contained">Submit</Button>
+			</ScrollView>
+		</View>
 	);
 };
 
