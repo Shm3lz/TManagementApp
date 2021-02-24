@@ -67,7 +67,7 @@ describe('Tasks selectors', () => {
 				'4': generateTask('4'),
 			};
 
-			expect(getTasksByDate(state, testDate)).toStrictEqual([
+			expect(getTasksByDate(state.tasks, testDate)).toStrictEqual([
 				state.tasks.instances['1'], state.tasks.instances['2'], state.tasks.instances['5'],
 			]);
 		});
@@ -80,7 +80,7 @@ describe('Tasks selectors', () => {
 				'4': generateTask('4'),
 			};
 
-			expect(getTasksByDate(state, testDate)).toStrictEqual([]);
+			expect(getTasksByDate(state.tasks, testDate)).toStrictEqual([]);
 		});
 	});
 

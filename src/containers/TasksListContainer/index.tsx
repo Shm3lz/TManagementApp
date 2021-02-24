@@ -1,18 +1,23 @@
+import React from 'react';
 import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux';
 
 import { State } from '../../store';
-import { setTaskDone, Task } from '../../reducers/tasks';
+import { clearRegularTasks, instantiateRegularTasks, RegularTaskTemplate, setTaskDone, Task } from '../../reducers/tasks';
 import { getTasksByDate } from '../../selectors/tasks';
 import TasksList from '../../components/TasksList';
+import { ById } from '../../util/types';
 
 interface StateProps {
 	tasks: Task[];
+	templates: ById<RegularTaskTemplate>,
+	chosenDate: Date;
 }
 
 interface DispatchProps {
 	onTaskDone: (id: string) => void;
 	onTaskUndone: (id: string) => void;
-	onCardPress: (id: string) => void;
+	instantiateRegularTasks: (date: Date) => void;
+	clearRegularTasks: (date: Date) => void;
 }
 
 interface OwnProps {
@@ -21,14 +26,45 @@ interface OwnProps {
 
 const mapStateToProps: MapStateToProps<StateProps, OwnProps, State> = state => {
 	return {
-		tasks: getTasksByDate(state, state.chosenDate).sort((a, b) => Number(a.done) - Number(b.done)),
+		tasks: getTasksByDate(state.tasks, state.chosenDate).sort((a, b) => Number(a.done) - Number(b.done)),
+		chosenDate: state.chosenDate,
+		templates: state.tasks.templates,
 	};
 };
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (dispatch, props) => ({
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, unknown> = (dispatch) => ({
 	onTaskDone: id => dispatch(setTaskDone({ id })),
 	onTaskUndone: id => dispatch(setTaskDone({ id, done: false })),
-	onCardPress: id => props.openTaskInfo(id),
+	instantiateRegularTasks: date => dispatch(instantiateRegularTasks(date)),
+	clearRegularTasks: date => dispatch(clearRegularTasks(date)),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(TasksList);
+const TasksListContainer: React.FC<OwnProps & DispatchProps & StateProps> = ({
+	tasks,
+	templates,
+	chosenDate,
+	onTaskDone,
+	onTaskUndone,
+	openTaskInfo,
+	instantiateRegularTasks,
+	clearRegularTasks,
+}) => {
+	const handleCardPress = React.useCallback((id: string) => openTaskInfo(id), [openTaskInfo]);
+	React.useEffect(() => {
+		instantiateRegularTasks(chosenDate);
+		return () => {
+			clearRegularTasks(chosenDate);
+		};
+	}, [chosenDate, templates, instantiateRegularTasks, clearRegularTasks]);
+
+	return (
+		<TasksList
+			tasks={tasks}
+			onTaskDone={onTaskDone}
+			onTaskUndone={onTaskUndone}
+			onCardPress={handleCardPress}
+		/>
+	);
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TasksListContainer);

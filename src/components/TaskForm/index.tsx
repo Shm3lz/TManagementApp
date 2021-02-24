@@ -83,7 +83,7 @@ function useTextInput(value = '', hasError?: (s: string) => boolean) {
 		checkErrors: () => hasError && setError(hasError(text)),
 		bind: {
 			defaultValue: value,
-			onTextChange: (newVal: string) => {
+			onChangeText: (newVal: string) => {
 				setText(newVal);
 				hasError && setError(hasError(text));
 			},
@@ -99,7 +99,7 @@ function isEmpty(s: string): boolean {
 const defaultInfo = { date: new Date(), name: 'New task', color: 'black', repeat: [] };
 
 const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
-	const { text: taskName, bind: taskNameProps } = useTextInput(initialValue?.name, isEmpty);
+	const { text: taskName, bind: taskNameProps, checkErrors: checkNameEmpty } = useTextInput(initialValue?.name, isEmpty);
 	const { text: description, bind: descriptionProps } = useTextInput(initialValue?.description);
 
 	const [hasGoal, toggleGoalSwitch] = useSwitch(Boolean(initialValue?.goal));
@@ -128,6 +128,11 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 	const handleChangeRepeatDays = React.useCallback((days: Array<WeekDay>) => setRepeatDays(days), [setRepeatDays]);
 
 	const handleFormSubmit = () => {
+		if (!taskName) {
+			checkNameEmpty();
+			return;
+		}
+
 		const task = {
 			...defaultInfo,
 			...initialValue,
@@ -136,9 +141,9 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 		};
 
 		if (hasGoal) {
-			if (currentGoal === GoalChip.Subtask) {
+			if (currentGoal === GoalChip.Subtask && Object.values(subtasks).length) {
 				task.subtasks = subtasks;
-			} else {
+			} else if (objective > 0) {
 				task.goal = {
 					progress: 0,
 					objective,

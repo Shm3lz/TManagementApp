@@ -1,22 +1,15 @@
 import * as React from 'react';
-import { Chip, Switch, Title } from 'react-native-paper';
+import { Switch, Title } from 'react-native-paper';
 import { View, StyleSheet } from 'react-native';
+
 import { WeekDay } from '../../../util/types';
 import useSwitch from '../../../hooks/useSwitch';
+import SimpleChip from '../../SimpleChip';
+import { getWeekDayName, WEEK_DAYS } from '../../../helpers/time';
 
 interface RepeatDaysSectionProps {
 	onChange: (days: Array<WeekDay>) => void;
 }
-
-const weekDays = {
-	monday: WeekDay.Monday,
-	tuesday: WeekDay.Tuesday,
-	wednesday: WeekDay.Wednesday,
-	thursday: WeekDay.Thursday,
-	friday: WeekDay.Friday,
-	saturday: WeekDay.Saturday,
-	sunday: WeekDay.Sunday,
-};
 
 const styles = StyleSheet.create({
 	sectionTitle: {
@@ -35,22 +28,24 @@ const styles = StyleSheet.create({
 
 const RepeatDaysSection: React.FC<RepeatDaysSectionProps> = ({ onChange }) => {
 	const [repeatSwitch, toggleSwitch] = useSwitch(false);
-
 	const handleSwitchToggle = () => {
 		toggleSwitch();
-		if (!repeatSwitch) setRepeatDays([]);
+		if (!repeatSwitch) changeRepeatDays([]);
 	};
 
 	const [repeatDays, setRepeatDays] = React.useState([] as WeekDay[]);
+	const changeRepeatDays = (days: Array<WeekDay>) => {
+		onChange(days);
+		setRepeatDays(days);
+	};
+
 	const handleRepeatDayToggle = (day: WeekDay) => {
 		if (repeatDays.includes(day)) {
-			setRepeatDays(repeatDays.filter(d => d !== day));
-			onChange(repeatDays);
+			changeRepeatDays(repeatDays.filter(d => d !== day));
 			return;
 		}
 
-		setRepeatDays([...repeatDays, day]);
-		onChange(repeatDays);
+		changeRepeatDays([...repeatDays, day]);
 	};
 
 	return (
@@ -64,15 +59,13 @@ const RepeatDaysSection: React.FC<RepeatDaysSectionProps> = ({ onChange }) => {
 			</View>
 			{repeatSwitch &&
 				<View style={styles.chips}>
-					{Object.values(weekDays).map((day, i) => (
-						<Chip
-							selected={repeatDays.includes(day)}
-							onPress={() => handleRepeatDayToggle(day)}
-							mode="outlined"
+					{Object.keys(WEEK_DAYS).map((day, i) => (
+						<SimpleChip
+							checked={repeatDays.includes(parseInt(day))}
+							onPress={() => handleRepeatDayToggle(parseInt(day))}
 							key={i}
-						>
-							{day}
-						</Chip>
+							text={getWeekDayName(parseInt(day)).substr(0, 2)}
+						/>
 					))}
 				</View>
 			}

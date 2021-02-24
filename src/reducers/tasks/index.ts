@@ -1,4 +1,5 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
+import { getTasksByDate, getTemplatesByDate } from '../../selectors/tasks';
 import clamp from '../../util/clamp';
 import { ById, WeekDay } from '../../util/types';
 
@@ -8,7 +9,7 @@ export enum GoalUnit {
 	Complex = 'subtasks',
 }
 
-export interface Goal {
+export declare interface Goal {
 	progress: number;
 	objective: number;
 	unitName: GoalUnit.Simple | string;
@@ -35,11 +36,11 @@ export interface Task {
 
 export type TaskInformation = Omit<RegularTaskTemplate, 'id' | 'templateId' | 'done'>;
 
-export interface RegularTaskTemplate extends Task {
+export interface RegularTaskTemplate extends Omit<Task, 'done'> {
 	repeat: WeekDay[];
 }
 
-interface TasksState {
+export interface TasksState {
 	instances: ById<Task>;
 	templates: ById<RegularTaskTemplate>
 }
@@ -51,6 +52,10 @@ export const addSingleTask = createAction<Task>('tasks/addSingleTask');
 export const deleteTask = createAction<string>('tasks/deleteSingleTask');
 
 export const instantiateTemplate = createAction<{ id: string, date: Date }>('tasks/instantiateTemplate');
+
+export const instantiateRegularTasks = createAction<Date>('tasks/instantiateRegular');
+
+export const clearRegularTasks = createAction<Date>('tasks/clearRegular');
 
 export const editTask = createAction<{ id: string, data: Partial<Omit<Task, 'templateId'>> }>('tasks/editTask');
 
@@ -121,7 +126,7 @@ const initialState: TasksState = {
 	},
 };
 
-export const tasksReducer = createReducer<TasksState>(initialState, builder => {
+export const tasksReducer = createReducer<TasksState>({ instances: {}, templates: {} }, builder => {
 	builder.addCase(addRegularTask, (state, action) => {
 		state.templates[action.payload.id] = action.payload;
 	});
@@ -183,7 +188,31 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 			id: instanceId,
 			date: action.payload.date,
 			templateId: template.id,
+			done: false,
 		};
+	});
+
+	builder.addCase(instantiateRegularTasks, (state, { payload: date }) => {
+		const templates = getTemplatesByDate(state, date);
+
+		templates.forEach(t => {
+			const task = createTaskFromTemplate(t, date);
+			state.instances[task.id] = task;
+		});
+
+		// console.log(state);
+	});
+
+	builder.addCase(clearRegularTasks, (state, { payload: date }) => {
+		const tasks = getTasksByDate(state, date);
+		// console.log(state);
+		for (const task of tasks) {
+			if (task.templateId && !hasProgress(task)) {
+				delete state.instances[task.id];
+			}
+		}
+
+		// console.log(state);
 	});
 
 	builder.addCase(setTaskDone, (state, action) => {
@@ -193,3 +222,26 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 	});
 });
 
+export function createTaskFromTemplate(template: RegularTaskTemplate, date: Date): Task {
+	return {
+		...template,
+		id: String(Date.now()),
+		templateId: template.id,
+		date,
+		done: false,
+	};
+}
+
+export function hasProgress(task: Task | TaskInformation): boolean {
+	if (task.subtasks) {
+
+		// If at least one subtask is done => this task has some progress
+		return !Object.values(task.subtasks).reduce<boolean>((acc, curr) => acc = acc || curr.done, false);
+	}
+
+	if (task.goal) {
+		return task.goal.progress > 0;
+	}
+
+	return false;
+}

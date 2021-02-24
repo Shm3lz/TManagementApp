@@ -26,8 +26,8 @@ type ContainerProps = StateProps & DispatchProps;
 
 const mapStateToProps: MapStateToProps<StateProps, unknown, State> = (state) => ({
 	chosenDate: state.chosenDate,
-	tasksDoneNumber: countTasksDoneByDate(state, state.chosenDate),
-	tasksNumber: countTasksByDate(state, state.chosenDate),
+	tasksDoneNumber: countTasksDoneByDate(state.tasks, state.chosenDate),
+	tasksNumber: countTasksByDate(state.tasks, state.chosenDate),
 });
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, unknown> = dispatch => ({

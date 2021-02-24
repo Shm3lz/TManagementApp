@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, KeyboardTypeOptions } from 'react-native';
-import { Dialog, TextInput, Button, withTheme, HelperText } from 'react-native-paper';
+import { Dialog, TextInput, Button, withTheme } from 'react-native-paper';
 
 interface SetValueModalProps {
 	visible: boolean;
@@ -40,7 +40,6 @@ const SetValueModal: React.FC<SetValueModalProps> = ({ visible, onClose, onSubmi
 
 		setValue('');
 	}, [onClose]);
-	// const containerBackgroundStyle = React.useMemo(() => ({ backgroundColor: theme.colors.background }), [theme]);
 
 	return (
 		<Dialog onDismiss={handleClose} dismissable={true} visible={visible}>

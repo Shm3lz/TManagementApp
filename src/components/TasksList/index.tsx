@@ -16,7 +16,7 @@ const margin = 10;
 
 const style = StyleSheet.create({
 	swipeRow: {
-		margin,
+		margin: 10,
 	},
 	scrollView: {
 		paddingBottom: 10,

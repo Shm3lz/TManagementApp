@@ -5,12 +5,12 @@ export type DeepPartial<T> = {
 export type ById<T> = { [id: string]: T };
 
 export enum WeekDay {
-	Monday = 'Mo',
-	Tuesday = 'Tu',
-	Wednesday = 'We',
-	Thursday = 'Th',
-	Friday = 'Fr',
-	Saturday = 'Sa',
-	Sunday = 'Su',
+	Sunday,
+	Monday,
+	Tuesday,
+	Wednesday,
+	Thursday,
+	Friday,
+	Saturday,
 }
 

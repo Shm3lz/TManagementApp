@@ -8,8 +8,6 @@ import { addSingleTask, addRegularTask, TaskInformation } from '../../reducers/t
 import Routes from '../../routes';
 import StackHeaderContainer from '../../containers/StackHeaderContainer';
 import TaskForm from '../../components/TaskForm';
-import { WeekDay } from '../../util/types';
-import { Task } from '../../reducers/tasks';
 
 interface CreateTaskScreenProps {
 	navigation: StackNavigationProp<{ [Routes.CreateTask]: undefined }>;
@@ -22,7 +20,7 @@ interface DispatchProps {
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, CreateTaskScreenProps> = (dispatch) => ({
 	createTask: info => {
-		if (info.repeat.length === 0) {
+		if (info.repeat.length < 1) {
 			dispatch(addSingleTask({
 				id: String(Date.now()),
 				...info,
@@ -35,7 +33,6 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, CreateTaskScreenProp
 		dispatch(addRegularTask({
 			id: String(Date.now()),
 			...info,
-			done: false,
 		}));
 	},
 });
