@@ -5,6 +5,7 @@ enum Routes {
 	TasksList = 'TasksList',
 	TaskInfo = 'TaskInfo',
 	CreateTask = 'CreateTask',
+	EditTask = 'EditTask',
 }
 
 export default Routes;

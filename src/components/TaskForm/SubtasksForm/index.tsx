@@ -42,14 +42,16 @@ const SubtasksForm: React.FC<RepeatDaysSectionProps> = ({ onChange }) => {
 	const handleModalSubmit = (value: string) => {
 		const id = Date.now();
 
-		setSubtasks({
+		const newSubtasks = {
 			...subtasks,
 			[id]: {
 				id,
 				name: value,
 			},
-		});
-		onChange(subtasks);
+		};
+
+		setSubtasks(newSubtasks);
+		onChange(newSubtasks);
 		setModalVisible(false);
 	};
 	const handleDeleteSubtask = (id: string) => {

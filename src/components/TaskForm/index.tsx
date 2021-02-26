@@ -23,6 +23,9 @@ interface TaskFormProps {
 }
 
 const styles = StyleSheet.create({
+	container: {
+		padding: 15,
+	},
 	field: {
 		marginBottom: 15,
 	},
@@ -141,7 +144,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 		};
 
 		if (hasGoal) {
-			if (currentGoal === GoalChip.Subtask && Object.values(subtasks).length) {
+			if (currentGoal === GoalChip.Subtask && Object.values(subtasks).length > 0) {
 				task.subtasks = subtasks;
 			} else if (objective > 0) {
 				task.goal = {
@@ -162,8 +165,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 	};
 
 	return (
-		<View>
-			<ScrollView style={{ height: '100%' }} showsVerticalScrollIndicator={false}>
+		<ScrollView showsVerticalScrollIndicator={false}>
+			<View style={styles.container}>
 				<Surface style={styles.section}>
 					<Title style={styles.sectionTitle}>Information about task</Title>
 					<TextInput
@@ -248,8 +251,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 					<RepeatDaysSection onChange={handleChangeRepeatDays} />
 				</Surface>
 				<Button onPress={handleFormSubmit} mode="contained">Submit</Button>
-			</ScrollView>
-		</View>
+			</View>
+		</ScrollView>
 	);
 };
 

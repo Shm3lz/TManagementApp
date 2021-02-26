@@ -37,12 +37,6 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, CreateTaskScreenProp
 	},
 });
 
-const styles = StyleSheet.create({
-	wrapper: {
-		padding: 15,
-	},
-});
-
 const CreateTaskScreen: React.FC<CreateTaskScreenProps & DispatchProps> = ({ navigation, createTask }) => {
 	React.useLayoutEffect(() => {
 		navigation
@@ -60,7 +54,7 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps & DispatchProps> = ({ nav
 	};
 
 	return (
-		<View style={styles.wrapper}>
+		<View>
 			<TaskForm onSubmit={handleSubmit}/>
 		</View>
 	);

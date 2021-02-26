@@ -1,6 +1,5 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
-import { act } from 'react-test-renderer';
-import { getTasksByDate, getTemplatesByDate, getUnusedTemplatesByDate } from '../../selectors/tasks';
+import { getTasksByDate, getUnusedTemplatesByDate } from '../../selectors/tasks';
 import clamp from '../../util/clamp';
 import { ById, WeekDay } from '../../util/types';
 
@@ -59,6 +58,8 @@ export const instantiateRegularTasks = createAction<Date>('tasks/instantiateRegu
 export const clearRegularTasks = createAction<Date>('tasks/clearRegular');
 
 export const editTask = createAction<{ id: string, data: Partial<Omit<Task, 'templateId'>> }>('tasks/editTask');
+
+export const editTemplate = createAction<{ id: string, data: Partial<RegularTaskTemplate>}>('tasks/editTemplate');
 
 export const updateGoal = createAction<{ id: string, progress: number }>('tasks/updateGoal');
 
@@ -161,6 +162,20 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 			...task,
 			...action.payload.data,
 		};
+	});
+
+	builder.addCase(editTemplate, (state, action) => {
+		const template = state.templates[action.payload.id];
+
+		state.templates[action.payload.id] = {
+			...template,
+			...action.payload.data,
+		};
+
+		Object.values(state.instances).forEach(task => {
+			if (task.templateId === template.id && !task.done)
+				delete state.instances[task.id];
+		});
 	});
 
 	builder.addCase(updateGoal, (state, action) => {

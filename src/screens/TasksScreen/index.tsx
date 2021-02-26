@@ -10,14 +10,16 @@ import DrawerHeaderContainer from '../../containers/DrawerHeaderContainer';
 import TasksHeaderWidgetContainer from '../../containers/TasksHeaderWidgetContainer';
 import TodayButtonContainer from '../../containers/TodayButtonContainer';
 import CreateTaskScreen from '../CreateTaskScreen';
+import EditTaskScreen from '../EditTaskScreen';
 
-type NavigationParams = {
+export type TasksNavigationParams = {
 	[Routes.TaskInfo]: { id: string },
+	[Routes.EditTask]: { id: string },
 	[Routes.TasksList]: undefined,
 	[Routes.CreateTask]: undefined,
 }
 
-const Stack = createStackNavigator<NavigationParams>();
+const Stack = createStackNavigator<TasksNavigationParams>();
 
 interface TasksScreenProps {
 	navigation: ScreenNavigationProp<Routes.Main>
@@ -36,7 +38,10 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ navigation, route }) => {
 	React.useLayoutEffect(() => {
 		const focusedRoute = getFocusedRouteNameFromRoute(route);
 
-		if (focusedRoute === Routes.TaskInfo || focusedRoute === Routes.CreateTask) {
+		if (focusedRoute === Routes.TaskInfo ||
+			focusedRoute === Routes.CreateTask ||
+			focusedRoute === Routes.EditTask
+		) {
 			return;
 		}
 
@@ -52,6 +57,7 @@ const TasksScreen: React.FC<TasksScreenProps> = ({ navigation, route }) => {
 			<Stack.Screen name={Routes.TaskInfo} component={TaskInfoScreen} />
 			<Stack.Screen name={Routes.TasksList} component={TasksListScreen} />
 			<Stack.Screen name={Routes.CreateTask} component={CreateTaskScreen} />
+			<Stack.Screen name={Routes.EditTask} component={EditTaskScreen} />
 		</Stack.Navigator>
 	);
 };

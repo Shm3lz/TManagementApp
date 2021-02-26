@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Button, Dialog, Paragraph, Surface, Title } from 'react-native-paper';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Route } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
@@ -15,9 +15,10 @@ import { WeekDay } from '../../util/types';
 import TimeSpentContainer from '../../containers/TimeSpentContainer';
 import SimpleChip from '../../components/SimpleChip';
 import { getWeekDayName, WEEK_DAYS } from '../../helpers/time';
+import { TasksNavigationParams } from '../TasksScreen';
 
 interface TaskInfoScreenProps {
-	navigation: StackNavigationProp<{ [Routes.TaskInfo]: { id: string } }>;
+	navigation: StackNavigationProp<TasksNavigationParams>;
 	route: Route<Routes.TaskInfo, { id: string }>;
 }
 
@@ -86,22 +87,34 @@ const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps & DispatchProps>
 			deleteTask(selectedTask.id);
 		}
 	}, [navigation, selectedTask, deleteTask]);
+
+	const handleEditBtnClick = React.useCallback(() => {
+		if (!selectedTask) return;
+
+		navigation.navigate(Routes.EditTask, { id: selectedTask.id });
+	}, [navigation, selectedTask]);
+
 	React.useLayoutEffect(() => {
 		navigation
 			.dangerouslyGetParent()
 			?.setOptions({
 				header: props => <StackHeaderContainer {...props} />,
 				headerTitle: selectedTask?.name,
-				headerRight: () => <><MaterialIcons onPress={handleDeleteBtnClick} name="delete" size={24} color="white" /></>,
+				headerRight: () => (
+					<>
+						<MaterialIcons onPress={handleEditBtnClick} name="edit" size={24} color="white" />
+						<MaterialIcons onPress={handleDeleteBtnClick} name="delete" size={24} color="white" />
+					</>
+				),
 			});
-	}, [navigation, selectedTask?.name, deleteTask, selectedTask?.id, handleDeleteBtnClick]);
+	}, [navigation, selectedTask?.name, deleteTask, selectedTask?.id, handleDeleteBtnClick, handleEditBtnClick]);
 
 	if (!selectedTask) {
 		return <></>;
 	}
 
 	return (
-		<View style={styles.wrapper}>
+		<ScrollView style={styles.wrapper} showsVerticalScrollIndicator={false}>
 			<Surface style={styles.section}>
 				<Title>Description</Title>
 				<Paragraph style={styles.paragraph}>{selectedTask.description || 'No description.'}</Paragraph>
@@ -137,7 +150,7 @@ const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps & DispatchProps>
 					<Button>Cancel</Button>
 				</Dialog.Actions>
 			</Dialog>
-		</View>
+		</ScrollView>
 	);
 };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import { Paragraph, withTheme } from 'react-native-paper';
 
 interface ChipProps {

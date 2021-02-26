@@ -45,6 +45,7 @@ const SetValueModal: React.FC<SetValueModalProps> = ({ visible, onClose, onSubmi
 		<Dialog onDismiss={handleClose} dismissable={true} visible={visible}>
 			<Dialog.Content>
 				<TextInput
+					mode="outlined"
 					label="Set value"
 					onSubmitEditing={handleSubmit}
 					keyboardType={keyboardType}
