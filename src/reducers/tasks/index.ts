@@ -1,5 +1,6 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
-import { getTasksByDate, getTemplatesByDate } from '../../selectors/tasks';
+import { act } from 'react-test-renderer';
+import { getTasksByDate, getTemplatesByDate, getUnusedTemplatesByDate } from '../../selectors/tasks';
 import clamp from '../../util/clamp';
 import { ById, WeekDay } from '../../util/types';
 
@@ -183,6 +184,7 @@ export const tasksReducer = createReducer<TasksState>({ instances: {}, templates
 	builder.addCase(instantiateTemplate, (state, action) => {
 		const instanceId = Date.now().toString();
 		const template = state.templates[action.payload.id];
+
 		state.instances[instanceId] = {
 			...template,
 			id: instanceId,
@@ -193,26 +195,21 @@ export const tasksReducer = createReducer<TasksState>({ instances: {}, templates
 	});
 
 	builder.addCase(instantiateRegularTasks, (state, { payload: date }) => {
-		const templates = getTemplatesByDate(state, date);
+		const templates = getUnusedTemplatesByDate(state, date);
 
 		templates.forEach(t => {
 			const task = createTaskFromTemplate(t, date);
 			state.instances[task.id] = task;
 		});
-
-		// console.log(state);
 	});
 
 	builder.addCase(clearRegularTasks, (state, { payload: date }) => {
 		const tasks = getTasksByDate(state, date);
-		// console.log(state);
 		for (const task of tasks) {
-			if (task.templateId && !hasProgress(task)) {
+			if (task.templateId && !hasProgress(task) && !task.done) {
 				delete state.instances[task.id];
 			}
 		}
-
-		// console.log(state);
 	});
 
 	builder.addCase(setTaskDone, (state, action) => {

@@ -31,3 +31,23 @@ export const getTemplatesByDate = createSelector<
 		.filter(template => template.repeat.includes(date.getDay() as WeekDay)),
 	items => items,
 );
+
+export const getUnusedTemplatesByDate = createSelector<
+	TasksState,
+	Date,
+	string[],
+	RegularTaskTemplate[],
+	RegularTaskTemplate[]
+>(
+	(state, date) => Object
+		.values(state.instances)
+		.reduce<string[]>((acc, curr) => {
+			if (isSameDay(curr.date, date) && curr.templateId) {
+				acc.push(curr.templateId);
+			}
+
+			return acc;
+		}, []),
+	getTemplatesByDate,
+	(templateIds, templates) => templates.filter(t => !templateIds.includes(t.id)),
+);

@@ -2,8 +2,8 @@ import React from 'react';
 import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux';
 
 import { State } from '../../store';
-import { clearRegularTasks, instantiateRegularTasks, RegularTaskTemplate, setTaskDone, Task } from '../../reducers/tasks';
-import { getTasksByDate } from '../../selectors/tasks';
+import { clearRegularTasks, createTaskFromTemplate, instantiateRegularTasks, RegularTaskTemplate, setTaskDone, Task } from '../../reducers/tasks';
+import { getTasksByDate, getTemplatesByDate } from '../../selectors/tasks';
 import TasksList from '../../components/TasksList';
 import { ById } from '../../util/types';
 
@@ -25,8 +25,25 @@ interface OwnProps {
 }
 
 const mapStateToProps: MapStateToProps<StateProps, OwnProps, State> = state => {
+	// const templates = getTemplatesByDate(state.tasks, state.chosenDate);
+	// const instances = getTasksByDate(state.tasks, state.chosenDate);
+	// const usedTemplates = instances.reduce<string[]>((acc, curr) => {
+	// 	if (curr.templateId) acc.push(curr.templateId);
+
+	// 	return acc;
+	// }, []);
+
+	// const tasks = [
+	// 	...getTasksByDate(state.tasks, state.chosenDate),
+	// 	...templates
+	// 		.filter(t => usedTemplates.includes(t.id))
+	// 		.map(t => createTaskFromTemplate(t, state.chosenDate)),
+	// ].sort((a, b) => Number(a.done) - Number(b.done));
+
+	const tasks = getTasksByDate(state.tasks, state.chosenDate).sort((a, b) => Number(a.done) - Number(b.done));
+
 	return {
-		tasks: getTasksByDate(state.tasks, state.chosenDate).sort((a, b) => Number(a.done) - Number(b.done)),
+		tasks,
 		chosenDate: state.chosenDate,
 		templates: state.tasks.templates,
 	};

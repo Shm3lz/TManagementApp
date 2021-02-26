@@ -12,8 +12,6 @@ interface TasksListProps {
 	onCardPress: (id: string) => void;
 }
 
-const margin = 10;
-
 const style = StyleSheet.create({
 	swipeRow: {
 		margin: 10,
