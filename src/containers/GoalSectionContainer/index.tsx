@@ -29,7 +29,6 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (dispatc
 
 const styles = StyleSheet.create({
 	wrapper: {
-		padding: 5,
 		paddingLeft: 10,
 	},
 

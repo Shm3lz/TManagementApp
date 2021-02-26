@@ -18,11 +18,6 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-around',
 		marginTop: 6,
 	},
-
-	paragraph: {
-		paddingLeft: 10,
-		paddingRight: 10,
-	},
 });
 
 const SimpleGoalSection: React.FC<SectionProps> = ({ data, onGoalUpdate, onSetManualPress }) => {
@@ -43,7 +38,7 @@ const SimpleGoalSection: React.FC<SectionProps> = ({ data, onGoalUpdate, onSetMa
 		<View>
 			<View>
 				<Title>Goal</Title>
-				<View style={styles.paragraph}>
+				<View>
 					<Subheading>{getGoalProgressString(data)}</Subheading>
 					<View style={styles.sectionControls}>
 						<Button mode="contained" onPress={incrementProgress}>Add 1</Button>

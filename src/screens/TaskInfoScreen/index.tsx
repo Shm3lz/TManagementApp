@@ -1,18 +1,20 @@
 import * as React from 'react';
-import { Paragraph, Title } from 'react-native-paper';
+import { Button, Dialog, Paragraph, Surface, Title } from 'react-native-paper';
 import { View, StyleSheet } from 'react-native';
 import { Route } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 import Routes from '../../routes';
 import StackHeaderContainer from '../../containers/StackHeaderContainer';
-import { Task, TaskInformation } from '../../reducers/tasks';
-import { connect, MapStateToProps } from 'react-redux';
+import { deleteTask, Task } from '../../reducers/tasks';
+import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import { State } from '../../store';
 import { MaterialIcons } from '@expo/vector-icons';
 import GoalSectionContainer from '../../containers/GoalSectionContainer';
 import { WeekDay } from '../../util/types';
 import TimeSpentContainer from '../../containers/TimeSpentContainer';
+import SimpleChip from '../../components/SimpleChip';
+import { getWeekDayName, WEEK_DAYS } from '../../helpers/time';
 
 interface TaskInfoScreenProps {
 	navigation: StackNavigationProp<{ [Routes.TaskInfo]: { id: string } }>;
@@ -20,15 +22,19 @@ interface TaskInfoScreenProps {
 }
 
 interface StateProps {
-	selectedTask: Task;
+	selectedTask?: Task;
 	repeat: WeekDay[],
+}
+
+interface DispatchProps {
+	deleteTask: (id: string) => void;
 }
 
 const mapStateToProps: MapStateToProps<StateProps, TaskInfoScreenProps, State> = (state, props) => {
 	const { id } = props.route.params;
 
 	const task = state.tasks.instances[id];
-	const repeat = task.templateId ?
+	const repeat = task?.templateId ?
 		state.tasks.templates[task.templateId].repeat : [];
 
 	return {
@@ -37,41 +43,102 @@ const mapStateToProps: MapStateToProps<StateProps, TaskInfoScreenProps, State> =
 	};
 };
 
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, unknown> = dispatch => ({
+	deleteTask: id => dispatch(deleteTask(id)),
+});
+
 const styles = StyleSheet.create({
+	section: {
+		elevation: 3,
+		padding: 10,
+		borderRadius: 10,
+		marginBottom: 15,
+		marginHorizontal: 3,
+	},
+	repeatDays: {
+		marginTop: 10,
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+	},
 	wrapper: {
 		padding: 5,
 		paddingLeft: 10,
 	},
-
 	paragraph: {
 		paddingLeft: 10,
 		paddingRight: 10,
 	},
-
 	alignTextCenter: {
 		textAlign: 'center',
 	},
 });
 
-const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps> = ({ navigation, selectedTask, repeat }) => {
+const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps & DispatchProps> = ({
+	navigation,
+	selectedTask,
+	repeat,
+	deleteTask,
+}) => {
+	const handleDeleteBtnClick = React.useCallback(() => {
+		navigation.goBack();
+		if (selectedTask) {
+			deleteTask(selectedTask.id);
+		}
+	}, [navigation, selectedTask, deleteTask]);
 	React.useLayoutEffect(() => {
 		navigation
 			.dangerouslyGetParent()
 			?.setOptions({
 				header: props => <StackHeaderContainer {...props} />,
-				headerTitle: selectedTask.name,
-				headerRight: () => <><MaterialIcons name="edit" size={24} color="white" /><MaterialIcons name="delete" size={24} color="white" /></>,
+				headerTitle: selectedTask?.name,
+				headerRight: () => <><MaterialIcons onPress={handleDeleteBtnClick} name="delete" size={24} color="white" /></>,
 			});
-	}, [navigation, selectedTask.name]);
+	}, [navigation, selectedTask?.name, deleteTask, selectedTask?.id, handleDeleteBtnClick]);
+
+	if (!selectedTask) {
+		return <></>;
+	}
 
 	return (
 		<View style={styles.wrapper}>
-			<Title>Description</Title>
-			<Paragraph style={styles.paragraph}>{selectedTask.description || 'No description.'}</Paragraph>
-			<GoalSectionContainer data={selectedTask} />
-			{typeof selectedTask.timeSpent !== 'undefined' && <TimeSpentContainer data={selectedTask} />}
+			<Surface style={styles.section}>
+				<Title>Description</Title>
+				<Paragraph style={styles.paragraph}>{selectedTask.description || 'No description.'}</Paragraph>
+			</Surface>
+			<Surface style={styles.section}>
+				<GoalSectionContainer data={selectedTask} />
+			</Surface>
+			{typeof selectedTask.timeSpent !== 'undefined' &&
+				<Surface style={styles.section}>
+					<TimeSpentContainer data={selectedTask} />
+				</Surface>
+			}
+			{repeat.length > 0 &&
+				<Surface style={styles.section}>
+					<Title>Repeat</Title>
+					<View style={styles.repeatDays}>
+						{Object.keys(WEEK_DAYS).map((day, i) => (
+							<SimpleChip
+								checked={repeat.includes(parseInt(day))}
+								key={i}
+								text={getWeekDayName(parseInt(day)).substr(0, 2)}
+							/>
+						))}
+					</View>
+				</Surface>
+			}
+			<Dialog visible={false}>
+				<Dialog.Content>
+					Are you sure?
+				</Dialog.Content>
+				<Dialog.Actions>
+					<Button>Ok</Button>
+					<Button>Cancel</Button>
+				</Dialog.Actions>
+			</Dialog>
 		</View>
 	);
 };
 
-export default connect(mapStateToProps)(TaskInfoScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(TaskInfoScreen);

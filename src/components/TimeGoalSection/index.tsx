@@ -17,18 +17,13 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-around',
 		marginTop: 6,
 	},
-
-	paragraph: {
-		paddingLeft: 10,
-		paddingRight: 10,
-	},
 });
 
 const TimeGoalSection: React.FC<SectionProps> = ({ data, onSetManualPress }) => {
 	return (
 		<View>
 			<Title>Time goal</Title>
-			<View style={styles.paragraph}>
+			<View>
 				<Subheading>{getGoalProgressString(data)}</Subheading>
 				<View style={styles.sectionControls}>
 					<Button mode="contained" onPress={onSetManualPress}>Set manually</Button>

@@ -127,7 +127,7 @@ const initialState: TasksState = {
 	},
 };
 
-export const tasksReducer = createReducer<TasksState>({ instances: {}, templates: {} }, builder => {
+export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 	builder.addCase(addRegularTask, (state, action) => {
 		state.templates[action.payload.id] = action.payload;
 	});
@@ -145,7 +145,7 @@ export const tasksReducer = createReducer<TasksState>({ instances: {}, templates
 		}
 
 		for (const task of Object.values(state.instances)) {
-			if (task.templateId === templateId && !task.done) {
+			if (task.templateId === templateId) {
 				delete state.instances[task.id];
 			}
 		}

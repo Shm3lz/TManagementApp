@@ -1,4 +1,4 @@
-import { Goal, GoalUnit, RegularTaskTemplate, Task, TaskInformation } from '../reducers/tasks';
+import { Goal, GoalUnit, Task, TaskInformation } from '../reducers/tasks';
 import { ById } from '../util/types';
 
 export function countTasksDone(tasks: ById<Task>): number {

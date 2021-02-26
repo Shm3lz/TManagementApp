@@ -2,8 +2,8 @@ import React from 'react';
 import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux';
 
 import { State } from '../../store';
-import { clearRegularTasks, createTaskFromTemplate, instantiateRegularTasks, RegularTaskTemplate, setTaskDone, Task } from '../../reducers/tasks';
-import { getTasksByDate, getTemplatesByDate } from '../../selectors/tasks';
+import { clearRegularTasks, instantiateRegularTasks, RegularTaskTemplate, setTaskDone, Task } from '../../reducers/tasks';
+import { getTasksByDate } from '../../selectors/tasks';
 import TasksList from '../../components/TasksList';
 import { ById } from '../../util/types';
 
