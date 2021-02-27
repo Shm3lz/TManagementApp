@@ -10,7 +10,10 @@ import {
 	TextInput,
 	Title,
 } from 'react-native-paper';
+import { hasTimeGoal } from '../../helpers/tasks';
+import { getTimeString } from '../../helpers/time';
 import useSwitch from '../../hooks/useSwitch';
+import useTextInput from '../../hooks/useTextInput';
 
 import { GoalUnit, Task, TaskInformation } from '../../reducers/tasks';
 import { ById, WeekDay } from '../../util/types';
@@ -77,37 +80,29 @@ enum GoalChip {
 	Subtask,
 }
 
-function useTextInput(value = '', hasError?: (s: string) => boolean) {
-	const [text, setText] = React.useState(value);
-	const [error, setError] = React.useState(false);
+function getTaskChip(task?: TaskInformation): GoalChip | void {
+	if (!task) return;
 
-	return {
-		text,
-		checkErrors: () => hasError && setError(hasError(text)),
-		bind: {
-			defaultValue: value,
-			onChangeText: (newVal: string) => {
-				setText(newVal);
-				hasError && setError(hasError(text));
-			},
-			error,
-		},
-	};
+	if (task.subtasks) return GoalChip.Subtask;
+
+	if (task.goal) {
+		if (hasTimeGoal(task)) return GoalChip.Time;
+
+		return GoalChip.Simple;
+	}
 }
 
 function isEmpty(s: string): boolean {
 	return s.trim() === '';
 }
 
-const defaultInfo = { date: new Date(), name: 'New task', color: 'black', repeat: [] };
-
 const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 	const { text: taskName, bind: taskNameProps, checkErrors: checkNameEmpty } = useTextInput(initialValue?.name, isEmpty);
 	const { text: description, bind: descriptionProps } = useTextInput(initialValue?.description);
 
-	const [hasGoal, toggleGoalSwitch] = useSwitch(Boolean(initialValue?.goal));
+	const [hasGoal, toggleGoalSwitch] = useSwitch(Boolean(initialValue?.goal || initialValue?.subtasks));
 
-	const [currentGoal, setCurrentGoal] = React.useState(GoalChip.Simple);
+	const [currentGoal, setCurrentGoal] = React.useState(getTaskChip(initialValue) || GoalChip.Simple);
 	const handleChipPress = (chip: GoalChip) => () => {
 		if (chip === GoalChip.Simple) setUnitName(GoalUnit.Simple);
 		if (chip === GoalChip.Time) setUnitName(GoalUnit.Time);
@@ -117,18 +112,11 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 	};
 
 	const [objective, setObjective] = React.useState(initialValue?.goal?.objective || 0);
-	const handleObjectiveChange = React.useCallback((value: string) => setObjective(Number(value)), [setObjective]);
+	const handleObjectiveChange = React.useCallback((value: string) => setObjective(parseInt(value)), [setObjective]);
 
 	const [unitName, setUnitName] = React.useState(initialValue?.goal?.unitName || GoalUnit.Simple);
-	const handleUnitNameChange = React.useCallback((value: string) => setUnitName(value), [setUnitName]);
-
-	const [subtasks, setSubtasks] = React.useState({} as ById<Task>);
-	const handleChangeSubtasks = (sb: ById<Task>) => setSubtasks(sb);
-
-	const [timeStatsSwitch, toggleTimeSwitch] = useSwitch(Boolean(initialValue?.timeSpent));
-
-	const [repeatDays, setRepeatDays] = React.useState([] as WeekDay[]);
-	const handleChangeRepeatDays = React.useCallback((days: Array<WeekDay>) => setRepeatDays(days), [setRepeatDays]);
+	const [subtasks, setSubtasks] = React.useState(initialValue?.subtasks || {} as ById<Task>);
+	const [repeatDays, setRepeatDays] = React.useState(initialValue?.repeat || [] as WeekDay[]);
 
 	const handleFormSubmit = () => {
 		if (!taskName) {
@@ -137,10 +125,13 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 		}
 
 		const task = {
-			...defaultInfo,
+			color: 'black',
+			date: new Date(),
 			...initialValue,
+			repeat: repeatDays,
 			name: taskName,
 			description,
+			timeSpent: 0,
 		};
 
 		if (hasGoal) {
@@ -154,12 +145,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 				};
 			}
 		}
-
-		if (timeStatsSwitch) {
-			task.timeSpent = 0;
-		}
-
-		task.repeat = repeatDays;
 
 		onSubmit(task);
 	};
@@ -214,41 +199,25 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 										defaultValue={unitName}
 										style={[styles.marginLeft, styles.goalInput]}
 										dense
-										onChangeText={handleUnitNameChange}
+										onChangeText={setUnitName}
 									/>
 								</View>
 							}
 							{currentGoal === GoalChip.Time &&
 								<View style={styles.goalForm}>
-									<TextInput
-										defaultValue={String(objective)}
-										keyboardType="numeric"
-										style={[styles.marginLeft, styles.goalInput]}
-										onChangeText={handleObjectiveChange}
-										dense
-									/>
-									<Subheading style={styles.marginLeft}>minutes</Subheading>
+									<Subheading style={styles.marginLeft}>{getTimeString(objective) || 'No objective'}</Subheading>
+									<Button mode="contained">Set</Button>
 								</View>
 							}
 							{currentGoal === GoalChip.Subtask &&
-								<SubtasksForm onChange={handleChangeSubtasks} />
+								<SubtasksForm defaultValue={subtasks} onChange={setSubtasks} />
 							}
 						</View>
 					}
 				</Surface>
 
 				<Surface style={styles.section}>
-					<View style={styles.sectionTitle}>
-						<Title>Time statistics</Title>
-						<Switch
-							onValueChange={toggleTimeSwitch}
-							value={timeStatsSwitch}
-						/>
-					</View>
-				</Surface>
-
-				<Surface style={styles.section}>
-					<RepeatDaysSection onChange={handleChangeRepeatDays} />
+					<RepeatDaysSection defaultValue={initialValue?.repeat} onChange={setRepeatDays} />
 				</Surface>
 				<Button onPress={handleFormSubmit} mode="contained">Submit</Button>
 			</View>

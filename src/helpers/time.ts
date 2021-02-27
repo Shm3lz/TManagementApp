@@ -1,3 +1,4 @@
+import { formatDuration } from 'date-fns';
 import { WeekDay } from '../util/types';
 
 export const WEEK_DAYS = {
@@ -12,4 +13,18 @@ export const WEEK_DAYS = {
 
 export function getWeekDayName(number: WeekDay): string {
 	return Object.values(WEEK_DAYS)[number];
+}
+
+/**
+ *
+ * @param timestamp Time in ms
+ */
+export function getTimeString(timestamp: number): string {
+	const date = new Date(timestamp);
+
+	return formatDuration({
+		hours: date.getHours(),
+		minutes: date.getMinutes(),
+		seconds: date.getSeconds(),
+	});
 }

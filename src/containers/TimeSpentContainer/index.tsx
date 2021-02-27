@@ -2,10 +2,10 @@ import * as React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { connect, MapDispatchToProps } from 'react-redux';
 
-import SetValueModal from '../../components/SetValueModal';
 import { Portal } from 'react-native-paper';
 import SpentTimeSection from '../../components/SpentTimeSection';
 import { setSpentTime, Task } from '../../reducers/tasks';
+import TimeModal from '../../components/TimeModal';
 
 interface OwnProps {
 	data: Task;
@@ -40,9 +40,9 @@ const TimeSpentContainer: React.FC<OwnProps & DispatchProps> = ({
 	const [modalVisible, setModalVisible] = React.useState(false);
 	const handleModalClose = React.useCallback(() => setModalVisible(false), []);
 	const openModal = React.useCallback(() => setModalVisible(true), []);
-	const handleModalSubmit = (v: string) => {
+	const handleModalSubmit = (v: number) => {
 		handleModalClose();
-		updateSpentTime(parseInt(v));
+		updateSpentTime(v);
 	};
 
 	return (
@@ -51,8 +51,7 @@ const TimeSpentContainer: React.FC<OwnProps & DispatchProps> = ({
 				<SpentTimeSection onSetManualPress={openModal} data={data} />
 			</View>
 			<Portal>
-				<SetValueModal
-					keyboardType="numeric"
+				<TimeModal
 					visible={modalVisible}
 					onClose={handleModalClose}
 					onSubmit={handleModalSubmit}

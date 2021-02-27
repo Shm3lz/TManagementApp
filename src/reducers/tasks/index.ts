@@ -30,7 +30,7 @@ export interface Task {
 	color: string; // replace with color type
 	goal?: Goal;
 	subtasks?: ById<Task>;
-	timeSpent?: number; // minutes
+	timeSpent?: number; // ms
 	done: boolean;
 }
 
@@ -128,7 +128,7 @@ const initialState: TasksState = {
 	},
 };
 
-export const tasksReducer = createReducer<TasksState>(initialState, builder => {
+export const tasksReducer = createReducer<TasksState>({ templates: {}, instances: {} }, builder => {
 	builder.addCase(addRegularTask, (state, action) => {
 		state.templates[action.payload.id] = action.payload;
 	});
@@ -147,6 +147,11 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 
 		for (const task of Object.values(state.instances)) {
 			if (task.templateId === templateId) {
+				if (hasProgress(task) || task.done) {
+					delete task.templateId;
+					continue;
+				}
+
 				delete state.instances[task.id];
 			}
 		}
@@ -173,8 +178,8 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 		};
 
 		Object.values(state.instances).forEach(task => {
-			if (task.templateId === template.id && !task.done)
-				delete state.instances[task.id];
+			if (task.templateId === template.id)
+				delete task.templateId;
 		});
 	});
 
@@ -229,8 +234,18 @@ export const tasksReducer = createReducer<TasksState>(initialState, builder => {
 
 	builder.addCase(setTaskDone, (state, action) => {
 		const { id, done = true } = action.payload;
+		const task = state.instances[id];
 
-		state.instances[id].done = done;
+		task.done = done;
+		if (task.goal) {
+			task.goal.progress = task.goal.objective;
+		}
+
+		if (task.subtasks) {
+			for (const id of Object.keys(task.subtasks)) {
+				task.subtasks[id].done = true;
+			}
+		}
 	});
 });
 

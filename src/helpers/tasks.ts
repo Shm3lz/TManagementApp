@@ -1,5 +1,6 @@
 import { Goal, GoalUnit, Task, TaskInformation } from '../reducers/tasks';
 import { ById } from '../util/types';
+import { getTimeString } from './time';
 
 export function countTasksDone(tasks: ById<Task>): number {
 	return Object.values(tasks).filter(t => t.done).length;
@@ -22,7 +23,7 @@ export function getSubtasksProgressString(subtasks: ById<Task>): string {
 export function getTaskSpentTime({ timeSpent }: Task): string {
 	if (typeof timeSpent === 'undefined') return '';
 
-	return `${timeSpent} minutes spent`;
+	return `${getTimeString(timeSpent)} spent`;
 }
 
 export function getTaskProgressString(task: Task): string {
@@ -51,7 +52,9 @@ export function getGoalPercantage(goal: Goal): number {
 }
 
 export function getTaskSubtitle(task: Task): string {
-	return `${task.done ? '' : getTaskProgressString(task)}${task.timeSpent ? `\n${getTaskSpentTime(task)}` : ''}`;
+	const progress = getTaskProgressString(task);
+	const spentTime = getTaskSpentTime(task);
+	return `${progress}${progress && spentTime && '\n'}${spentTime}`;
 }
 
 export function hasTimeGoal({ goal }: TaskInformation | Task): boolean {

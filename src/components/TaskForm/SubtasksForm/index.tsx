@@ -7,6 +7,7 @@ import { Task } from '../../../reducers/tasks';
 
 interface RepeatDaysSectionProps {
 	onChange: (subtasks: ById<Task>) => void;
+	defaultValue?: ById<Task>;
 }
 
 const styles = StyleSheet.create({
@@ -33,8 +34,8 @@ const styles = StyleSheet.create({
 	},
 });
 
-const SubtasksForm: React.FC<RepeatDaysSectionProps> = ({ onChange }) => {
-	const [subtasks, setSubtasks] = React.useState({} as ById<Task>);
+const SubtasksForm: React.FC<RepeatDaysSectionProps> = ({ defaultValue, onChange }) => {
+	const [subtasks, setSubtasks] = React.useState(defaultValue || {} as ById<Task>);
 
 	const [modalVisible, setModalVisible] = React.useState(false);
 	const handleModalClose = React.useCallback(() => setModalVisible(false), [setModalVisible]);
@@ -47,6 +48,7 @@ const SubtasksForm: React.FC<RepeatDaysSectionProps> = ({ onChange }) => {
 			[id]: {
 				id,
 				name: value,
+				done: false,
 			},
 		};
 

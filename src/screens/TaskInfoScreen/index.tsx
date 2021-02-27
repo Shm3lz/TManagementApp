@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Dialog, Paragraph, Surface, Title } from 'react-native-paper';
+import { IconButton, Button, Dialog, Paragraph, Surface, Title } from 'react-native-paper';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Route } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -9,13 +9,13 @@ import StackHeaderContainer from '../../containers/StackHeaderContainer';
 import { deleteTask, Task } from '../../reducers/tasks';
 import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import { State } from '../../store';
-import { MaterialIcons } from '@expo/vector-icons';
 import GoalSectionContainer from '../../containers/GoalSectionContainer';
 import { WeekDay } from '../../util/types';
 import TimeSpentContainer from '../../containers/TimeSpentContainer';
 import SimpleChip from '../../components/SimpleChip';
 import { getWeekDayName, WEEK_DAYS } from '../../helpers/time';
 import { TasksNavigationParams } from '../TasksScreen';
+import { hasTimeGoal } from '../../helpers/tasks';
 
 interface TaskInfoScreenProps {
 	navigation: StackNavigationProp<TasksNavigationParams>;
@@ -53,8 +53,9 @@ const styles = StyleSheet.create({
 		elevation: 3,
 		padding: 10,
 		borderRadius: 10,
-		marginBottom: 15,
+		marginTop: 13,
 		marginHorizontal: 3,
+		marginBottom: 5,
 	},
 	repeatDays: {
 		marginTop: 10,
@@ -79,6 +80,7 @@ const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps & DispatchProps>
 	navigation,
 	selectedTask,
 	repeat,
+	route,
 	deleteTask,
 }) => {
 	const handleDeleteBtnClick = React.useCallback(() => {
@@ -88,11 +90,11 @@ const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps & DispatchProps>
 		}
 	}, [navigation, selectedTask, deleteTask]);
 
-	const handleEditBtnClick = React.useCallback(() => {
-		if (!selectedTask) return;
-
-		navigation.navigate(Routes.EditTask, { id: selectedTask.id });
-	}, [navigation, selectedTask]);
+	const headerRight = React.useMemo(() => (
+		<>
+			<IconButton onPress={handleDeleteBtnClick} color="white" icon="delete" />
+		</>
+	), [handleDeleteBtnClick]);
 
 	React.useLayoutEffect(() => {
 		navigation
@@ -100,14 +102,9 @@ const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps & DispatchProps>
 			?.setOptions({
 				header: props => <StackHeaderContainer {...props} />,
 				headerTitle: selectedTask?.name,
-				headerRight: () => (
-					<>
-						<MaterialIcons onPress={handleEditBtnClick} name="edit" size={24} color="white" />
-						<MaterialIcons onPress={handleDeleteBtnClick} name="delete" size={24} color="white" />
-					</>
-				),
+				headerRight: () => headerRight,
 			});
-	}, [navigation, selectedTask?.name, deleteTask, selectedTask?.id, handleDeleteBtnClick, handleEditBtnClick]);
+	}, [navigation, selectedTask?.name, deleteTask, selectedTask?.id, headerRight, route.name]);
 
 	if (!selectedTask) {
 		return <></>;
@@ -119,10 +116,12 @@ const TaskInfoScreen: React.FC<TaskInfoScreenProps & StateProps & DispatchProps>
 				<Title>Description</Title>
 				<Paragraph style={styles.paragraph}>{selectedTask.description || 'No description.'}</Paragraph>
 			</Surface>
-			<Surface style={styles.section}>
-				<GoalSectionContainer data={selectedTask} />
-			</Surface>
-			{typeof selectedTask.timeSpent !== 'undefined' &&
+			{(selectedTask.goal || selectedTask.subtasks) &&
+				<Surface style={styles.section}>
+					<GoalSectionContainer data={selectedTask} />
+				</Surface>
+			}
+			{!hasTimeGoal(selectedTask) &&
 				<Surface style={styles.section}>
 					<TimeSpentContainer data={selectedTask} />
 				</Surface>

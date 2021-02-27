@@ -1,13 +1,14 @@
 import * as React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Route } from '@react-navigation/native';
-import { connect, MapDispatchToProps } from 'react-redux';
+import { connect, MapDispatchToProps, MapStateToPropsParam } from 'react-redux';
 
 import { addSingleTask, addRegularTask, TaskInformation } from '../../reducers/tasks';
 import Routes from '../../routes';
 import StackHeaderContainer from '../../containers/StackHeaderContainer';
 import TaskForm from '../../components/TaskForm';
+import { State } from '../../store';
 
 interface CreateTaskScreenProps {
 	navigation: StackNavigationProp<{ [Routes.CreateTask]: undefined }>;
@@ -18,7 +19,13 @@ interface DispatchProps {
 	createTask: (info: TaskInformation) => void;
 }
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, CreateTaskScreenProps> = (dispatch) => ({
+interface StateProps {
+	chosenDate: Date;
+}
+
+const mapStateToProps: MapStateToPropsParam<StateProps, unknown, State> = ({ chosenDate }) => ({ chosenDate });
+
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, CreateTaskScreenProps> = dispatch => ({
 	createTask: info => {
 		if (info.repeat.length < 1) {
 			dispatch(addSingleTask({
@@ -37,7 +44,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, CreateTaskScreenProp
 	},
 });
 
-const CreateTaskScreen: React.FC<CreateTaskScreenProps & DispatchProps> = ({ navigation, createTask }) => {
+const CreateTaskScreen: React.FC<CreateTaskScreenProps & DispatchProps & StateProps> = ({ navigation, createTask, chosenDate }) => {
 	React.useLayoutEffect(() => {
 		navigation
 			.dangerouslyGetParent()
@@ -49,6 +56,7 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps & DispatchProps> = ({ nav
 	}, [navigation]);
 
 	const handleSubmit = (info: TaskInformation) => {
+		info.date = chosenDate;
 		createTask(info);
 		navigation.goBack();
 	};
@@ -60,4 +68,4 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps & DispatchProps> = ({ nav
 	);
 };
 
-export default connect(null, mapDispatchToProps)(CreateTaskScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(CreateTaskScreen);

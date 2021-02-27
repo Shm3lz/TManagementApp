@@ -31,7 +31,7 @@ const SpentTimeSection: React.FC<SectionProps> = ({ data, onSetManualPress }) =>
 			<Subheading style={styles.paragraph}>You have {getTaskSpentTime(data)} doing this task.</Subheading>
 			<View style={styles.sectionControls}>
 				<Button mode="contained" onPress={onSetManualPress}>Set manually</Button>
-				<Button mode="contained">Run stopwatch</Button>
+				<Button mode="contained" disabled>Run stopwatch</Button>
 			</View>
 		</View>
 	);

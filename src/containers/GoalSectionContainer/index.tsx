@@ -10,6 +10,7 @@ import { Task, TimeGoal, updateGoal, updateSubtask } from '../../reducers/tasks'
 import { hasTimeGoal } from '../../helpers/tasks';
 import SetValueModal from '../../components/SetValueModal';
 import { Portal } from 'react-native-paper';
+import TimeModal from '../../components/TimeModal';
 
 interface OwnProps {
 	data: Task;
@@ -46,7 +47,7 @@ const GoalSectionContainer: React.FC<OwnProps & DispatchProps> = ({
 	const [modalVisible, setModalVisible] = React.useState(false);
 	const handleModalClose = React.useCallback(() => setModalVisible(false), []);
 	const openModal = React.useCallback(() => setModalVisible(true), []);
-	const handleModalSubmit = (v: string) => {
+	const handleModalSubmit = (v: string | number) => {
 		handleModalClose();
 		onGoalUpdate(Number(v));
 	};
@@ -73,12 +74,19 @@ const GoalSectionContainer: React.FC<OwnProps & DispatchProps> = ({
 				}
 			</View>
 			<Portal>
-				<SetValueModal
-					keyboardType="numeric"
-					visible={modalVisible}
-					onClose={handleModalClose}
-					onSubmit={handleModalSubmit}
-				/>
+				{hasTimeGoal(data)
+					? <TimeModal
+						visible={modalVisible}
+						onClose={handleModalClose}
+						onSubmit={handleModalSubmit}
+					/>
+					: <SetValueModal
+						keyboardType="numeric"
+						visible={modalVisible}
+						onClose={handleModalClose}
+						onSubmit={handleModalSubmit}
+					/>
+				}
 			</Portal>
 		</>
 	);

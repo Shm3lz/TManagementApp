@@ -9,6 +9,7 @@ import { getWeekDayName, WEEK_DAYS } from '../../../helpers/time';
 
 interface RepeatDaysSectionProps {
 	onChange: (days: Array<WeekDay>) => void;
+	defaultValue?: Array<WeekDay>;
 }
 
 const styles = StyleSheet.create({
@@ -26,14 +27,14 @@ const styles = StyleSheet.create({
 	},
 });
 
-const RepeatDaysSection: React.FC<RepeatDaysSectionProps> = ({ onChange }) => {
-	const [repeatSwitch, toggleSwitch] = useSwitch(false);
+const RepeatDaysSection: React.FC<RepeatDaysSectionProps> = ({ defaultValue, onChange }) => {
+	const [repeatSwitch, toggleSwitch] = useSwitch(Boolean(defaultValue?.length));
 	const handleSwitchToggle = () => {
+		if (repeatSwitch) changeRepeatDays([]);
 		toggleSwitch();
-		if (!repeatSwitch) changeRepeatDays([]);
 	};
 
-	const [repeatDays, setRepeatDays] = React.useState([] as WeekDay[]);
+	const [repeatDays, setRepeatDays] = React.useState(defaultValue || [] as WeekDay[]);
 	const changeRepeatDays = (days: Array<WeekDay>) => {
 		onChange(days);
 		setRepeatDays(days);

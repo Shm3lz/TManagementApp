@@ -27,7 +27,7 @@ const TimeGoalSection: React.FC<SectionProps> = ({ data, onSetManualPress }) => 
 				<Subheading>{getGoalProgressString(data)}</Subheading>
 				<View style={styles.sectionControls}>
 					<Button mode="contained" onPress={onSetManualPress}>Set manually</Button>
-					<Button mode="contained">Run stopwatch</Button>
+					<Button mode="contained" disabled>Run stopwatch</Button>
 				</View>
 			</View>
 		</View>

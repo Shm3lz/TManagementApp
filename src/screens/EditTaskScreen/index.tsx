@@ -9,9 +9,10 @@ import Routes from '../../routes';
 import StackHeaderContainer from '../../containers/StackHeaderContainer';
 import TaskForm from '../../components/TaskForm';
 import { State } from '../../store';
+import { TasksNavigationParams } from '../TasksScreen';
 
 interface EditTaskScreenProps {
-	navigation: StackNavigationProp<{ [Routes.EditTask]: { id: string } }>;
+	navigation: StackNavigationProp<TasksNavigationParams>;
 	route: Route<Routes.EditTask, { id: string }>;
 }
 
@@ -41,20 +42,26 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, EditTaskScreenProps>
 	editTemplate: (id, data) => dispatch(editTemplate({ id, data })),
 });
 
-const CreateTaskScreen: React.FC<EditTaskScreenProps & DispatchProps & StateProps> = ({ navigation, editTask, task, template }) => {
+const CreateTaskScreen: React.FC<EditTaskScreenProps & DispatchProps & StateProps> = ({ navigation, editTask, task, template, editTemplate}) => {
 	React.useLayoutEffect(() => {
 		navigation
 			.dangerouslyGetParent()
 			?.setOptions({
 				header: props => <StackHeaderContainer {...props} />,
-				headerTitle: 'Create task',
+				headerTitle: 'Edit task',
 				headerRight: () => <></>,
 			});
 	}, [navigation]);
 
 	const handleSubmit = (info: TaskInformation) => {
+		if (task.templateId) {
+			editTemplate(task.templateId, info);
+			navigation.navigate(Routes.TaskInfo, { id: task.id });
+			return;
+		}
+
 		editTask(task.id, info);
-		navigation.goBack();
+		navigation.navigate(Routes.TaskInfo, { id: task.id });
 	};
 
 	return (
