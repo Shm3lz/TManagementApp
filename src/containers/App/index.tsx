@@ -9,10 +9,10 @@ import { Provider as StoreProvider } from 'react-redux';
 import merge from 'deepmerge';
 
 import Navigator from '../Navigator';
-import { store } from '../../store';
+import { store, persistor } from '../../store';
 
 import 'intl';
-import { Platform } from 'react-native';
+import { Platform, View, Text } from 'react-native';
 
 if (Platform.OS === 'android') {
 	// See https://github.com/expo/expo/issues/6536 for this issue.
@@ -21,15 +21,18 @@ if (Platform.OS === 'android') {
 	}
 }
 import 'intl/locale-data/jsonp/en';
+import { PersistGate } from 'redux-persist/integration/react';
 
 const theme = merge(NavigationDefaultTheme, PaperDefaultTheme);
 
 const App: React.FC = () => {
 	return (
 		<StoreProvider store={store}>
-			<PaperProvider theme={theme}>
-				<Navigator theme={theme} />
-			</PaperProvider>
+			<PersistGate loading={<View><Text>hello</Text></View>} persistor={persistor}>
+				<PaperProvider theme={theme}>
+					<Navigator theme={theme} />
+				</PaperProvider>
+			</PersistGate>
 		</StoreProvider>
 	);
 };

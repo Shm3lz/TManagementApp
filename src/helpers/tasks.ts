@@ -13,6 +13,9 @@ export function hasComplexGoal(task: Task): boolean {
 export function getGoalProgressString(goal?: Goal): string {
 	if (!goal) return '';
 
+	if (goal.unitName === GoalUnit.Time)
+		return `${getTimeString(goal.progress) || '0'} of ${getTimeString(goal.objective)}`;
+
 	return `${goal.progress} of ${goal.objective} ${goal.unitName}`;
 }
 
@@ -21,7 +24,7 @@ export function getSubtasksProgressString(subtasks: ById<Task>): string {
 }
 
 export function getTaskSpentTime({ timeSpent }: Task): string {
-	if (typeof timeSpent === 'undefined') return '';
+	if (!timeSpent) return '';
 
 	return `${getTimeString(timeSpent)} spent`;
 }
@@ -54,7 +57,7 @@ export function getGoalPercantage(goal: Goal): number {
 export function getTaskSubtitle(task: Task): string {
 	const progress = getTaskProgressString(task);
 	const spentTime = getTaskSpentTime(task);
-	return `${progress}${progress && spentTime && '\n'}${spentTime}`;
+	return `${progress}${progress && spentTime ? '\n' : ''}${spentTime}`;
 }
 
 export function hasTimeGoal({ goal }: TaskInformation | Task): boolean {

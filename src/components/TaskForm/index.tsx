@@ -4,6 +4,7 @@ import {
 	Button,
 	Chip,
 	Divider,
+	Portal,
 	Subheading,
 	Surface,
 	Switch,
@@ -17,6 +18,7 @@ import useTextInput from '../../hooks/useTextInput';
 
 import { GoalUnit, Task, TaskInformation } from '../../reducers/tasks';
 import { ById, WeekDay } from '../../util/types';
+import TimeModal from '../TimeModal';
 import RepeatDaysSection from './RepeatDaysSection';
 import SubtasksForm from './SubtasksForm';
 
@@ -59,6 +61,14 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		marginTop: 10,
+	},
+	timeGoalForm: {
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		marginTop: 10,
+		flexWrap: 'wrap',
 	},
 	marginLeft: {
 		marginLeft: 10,
@@ -109,6 +119,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 
 		setObjective(0);
 		setCurrentGoal(chip);
+	};
+
+	const [timeModalVisible, setTimeModalVisible] = React.useState(false);
+	const handleModalClose = React.useCallback(() => setTimeModalVisible(false), []);
+	const openModal = React.useCallback(() => setTimeModalVisible(true), []);
+	const handleModalSubmit = (v: number) => {
+		handleModalClose();
+		setObjective(v);
 	};
 
 	const [objective, setObjective] = React.useState(initialValue?.goal?.objective || 0);
@@ -204,10 +222,19 @@ const TaskForm: React.FC<TaskFormProps> = ({ initialValue, onSubmit }) => {
 								</View>
 							}
 							{currentGoal === GoalChip.Time &&
-								<View style={styles.goalForm}>
-									<Subheading style={styles.marginLeft}>{getTimeString(objective) || 'No objective'}</Subheading>
-									<Button mode="contained">Set</Button>
-								</View>
+								<>
+									<View style={styles.timeGoalForm}>
+										<Subheading style={styles.marginLeft}>{getTimeString(objective) || 'No objective'}</Subheading>
+										<Button mode="contained" onPress={openModal}>Set</Button>
+									</View>
+									<Portal>
+										<TimeModal
+											visible={timeModalVisible}
+											onClose={handleModalClose}
+											onSubmit={handleModalSubmit}
+										/>
+									</Portal>
+								</>
 							}
 							{currentGoal === GoalChip.Subtask &&
 								<SubtasksForm defaultValue={subtasks} onChange={setSubtasks} />
